@@ -85,24 +85,23 @@ class Posts(Model):
         database = db
 
 
-# with open("../plitems_tags","wb") as f:
-#     pickle.dump([{"code":i.code,"tags":i.tags,"data":i.data} for i in PlIkeaItems.select().execute()],f)
+if __name__ == "__main__":
+    # with open("../plitems_tags","wb") as f:
+    #     pickle.dump([{"code":i.code,"tags":i.tags,"data":i.data} for i in PlIkeaItems.select().execute()],f)
 
+    # PlIkeaItems.drop_table()
+    # Posts.create_table()
+    # UaIkeaItems.drop_table()
+    # UaIkeaItems.create_table()
 
-# PlIkeaItems.drop_table()
-# Posts.create_table()
-# UaIkeaItems.drop_table()
-# UaIkeaItems.create_table()
+    print(UaIkeaItems.select().where(UaIkeaItems.avilable_updated == True).count())
+    print(UaIkeaItems.select().where((UaIkeaItems.avilable_updated == True) & (
+        UaIkeaItems.data["Личные_заметки"].cast("text").contains("Ошибка"))).count())
 
-print(UaIkeaItems.select().where(UaIkeaItems.avilable_updated == True).count())
-print(UaIkeaItems.select().where((UaIkeaItems.avilable_updated == True) & (
-    UaIkeaItems.data["Личные_заметки"].cast("text").contains("Ошибка"))).count())
-
-#
-# print(UaIkeaItems.get(UaIkeaItems.code=="30373588").avilable)
-# print(UaIkeaItems.get(UaIkeaItems.code=="19185433").avilable)
-# print(UaIkeaItems.get(UaIkeaItems.code=="19185433").avilable_updated)
-# print(UaIkeaItems.get(UaIkeaItems.code=="30373588").avilable_updated)
-# UaIkeaItems.update({UaIkeaItems.avilable:True}).execute()
-# UaIkeaItems.update({UaIkeaItems.avilable:False}).execute()
-# "yc782y09y9y094A"
+    # print(UaIkeaItems.get(UaIkeaItems.code=="30373588").avilable)
+    # print(UaIkeaItems.get(UaIkeaItems.code=="19185433").avilable)
+    # print(UaIkeaItems.get(UaIkeaItems.code=="19185433").avilable_updated)
+    # print(UaIkeaItems.get(UaIkeaItems.code=="30373588").avilable_updated)
+    # UaIkeaItems.update({UaIkeaItems.avilable:True}).execute()
+    # UaIkeaItems.update({UaIkeaItems.avilable:False}).execute()
+    # "yc782y09y9y094A"

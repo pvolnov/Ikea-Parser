@@ -156,27 +156,11 @@ def get_items_links(url="https://www.ikea.com/pl/pl/cat/tovari-products/"):
     uitems = []
     done = []
 
-    # with open("done.pk", "rb") as f:
-    #     done = pickle.load(f)
-    # with open("uitems.pk", "rb") as f:
-    #     uitems = pickle.load(f)
-    #
-    # uitems = []
-    # done = []
-
     for u in tqdm(urls):
         if u['href'] in done:
             continue
-        driver.get(u['href'])
-        while True:
-            try:
-                time.sleep(5)
-                driver.find_element_by_class_name("plp-btn--small").click()
-            except:
-                try:
-                    driver.find_element_by_id("onetrust-accept-btn-handler").click()
-                except:
-                    break
+        driver.get(u['href']+"?page=20")
+        time.sleep(3)
 
         soup = BeautifulSoup(driver.page_source, 'html5lib')
         uitems += [u['href'] for u in soup.find_all("a", {"aria-label": True})]
@@ -192,7 +176,7 @@ def get_items_links(url="https://www.ikea.com/pl/pl/cat/tovari-products/"):
 
 
 if __name__ == "__main__":
-    # driver = webdriver.Firefox()
+    driver = webdriver.Firefox()
 
     # items = PlIkeaItems.select().execute()
     # for i in tqdm(items[2871:]):
@@ -212,13 +196,13 @@ if __name__ == "__main__":
     #         i.save()
 
     mode = "PL"
-    for mode in ["PL", "UA"]:
+    for mode in ["UA","PL"]:
         print("RUN WITH MODE", mode)
 
-        driver = webdriver.Remote(
-            command_executor='http://dig2.neafiol.site:4444/wd/hub',
-            # command_executor='http://127.0.0.1:4444/wd/hub',
-            desired_capabilities=DesiredCapabilities.CHROME)
+        # driver = webdriver.Remote(
+        #     # command_executor='http://dig2.neafiol.site:4444/wd/hub',
+        #     command_executor='http://127.0.0.1:4444/wd/hub',
+        #     desired_capabilities=DesiredCapabilities.CHROME)
 
         if mode == "UA":
             uitems = get_items_links("https://www.ikea.com/ua/uk/cat/tovari-products/")
@@ -242,6 +226,7 @@ if __name__ == "__main__":
         print("done", len(done))
 
         for i, item in tqdm(enumerate(uitems), total=len(uitems)):
+            print(i)
             u = item["url"]
             code = item["code"]
             codes.append(code)
@@ -250,6 +235,7 @@ if __name__ == "__main__":
 
             try:
                 item, tags = parse_ikea_page(u)
+                print(item)
                 if mode == "PL":
                     ni, tags2 = get_translate_ikea_club(code)
                     if ni:

@@ -4,7 +4,6 @@ import time
 from bs4 import BeautifulSoup
 from peewee import fn
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 
 from bot.models import UaIkeaItems, PlIkeaItems
 
@@ -87,10 +86,14 @@ def check_avil_in_lublin(driver, url):
 
         soup = BeautifulSoup(driver.page_source, 'html5lib')
 
-        price = soup.find("div", {"data-product-price": True})["data-product-price"]
-        itm = UaIkeaItems.get(UaIkeaItems.url == url)
-        itm.data["Цена"] = price
-        itm.save()
+        if soup.find("div", {"data-product-price": True}):
+            price = soup.find("div", {"data-product-price": True})["data-product-price"]
+        else:
+            price = 0
+        itm = UaIkeaItems.get_or_none(UaIkeaItems.url == url)
+        if itm and price:
+            itm.data["Цена"] = price
+            itm.save()
 
         for div in soup.find_all("div", {"class": "range-revamp-change-store__store"}):
             if "Lublin" in div.text and "Dostępny" in div.text:
@@ -120,60 +123,70 @@ if __name__ == "__main__":
                 options=chrome_options
             )
 
-        # ================= Pl items update =================
+        try:
 
-        tasks = PlIkeaItems.select(PlIkeaItems.url, PlIkeaItems.code, PlIkeaItems.id).where(
-            PlIkeaItems.avilable_updated == False).order_by(
-            fn.Random()).limit(40).execute()
+            # ================= Pl items update =================
 
-        for t in tasks:
-            avil = check_avil_in_lublin(driver, t.url)
-            PlIkeaItems.set_by_id(t.id, {"avilable": avil, "avilable_updated": True})
-            print(t.url, avil)
+            tasks = PlIkeaItems.select(PlIkeaItems.url, PlIkeaItems.code, PlIkeaItems.id).where(
+                PlIkeaItems.avilable_updated == False).order_by(
+                fn.Random()).limit(40).execute()
 
-        if len(tasks) == 0:
-            print("All is loaded")
-            PlIkeaItems.update({PlIkeaItems.avilable_updated: False}).execute()
-            continue
+            for t in tasks:
+                avil = check_avil_in_lublin(driver, t.url)
+                PlIkeaItems.set_by_id(t.id, {"avilable": avil, "avilable_updated": True})
+                print(t.url, avil)
 
-        # ================= Ua items updates =================
+            if len(tasks) == 0:
+                print("All is loaded")
+                PlIkeaItems.update({PlIkeaItems.avilable_updated: False}).execute()
+                continue
 
-        tasks = UaIkeaItems.select().where(
-            UaIkeaItems.avilable_updated == False).order_by(
-            fn.Random()).limit(15).execute()
+            # ================= Ua items updates =================
 
-        if len(tasks) == 0:
-            print("All is loaded")
-            UaIkeaItems.update({UaIkeaItems.avilable_updated: False}).execute()
-            continue
+            tasks = UaIkeaItems.select().where(
+                UaIkeaItems.avilable_updated == False).order_by(
+                fn.Random()).limit(15).execute()
 
-        tasks_codes = {t.code.replace(".", "").strip("0"): t for t in tasks}
-        urls = [t.url for t in tasks]
+            if len(tasks) == 0:
+                print("All is loaded")
+                UaIkeaItems.update({UaIkeaItems.avilable_updated: False}).execute()
+                continue
 
-        UaIkeaItems.update({UaIkeaItems.avilable_updated: True}).where(  # UaIkeaItems.avilable: False
-            UaIkeaItems.id.in_([t.id for t in tasks])).execute()
+            tasks_codes = {t.code.replace(".", "").strip("0"): t for t in tasks}
+            urls = [t.url for t in tasks]
 
-        items = check_avil(driver, urls)
+            UaIkeaItems.update({UaIkeaItems.avilable_updated: True}).where(  # UaIkeaItems.avilable: False
+                UaIkeaItems.id.in_([t.id for t in tasks])).execute()
 
-        print("complete", UaIkeaItems.select().where(UaIkeaItems.avilable_updated == True).count())
-        for i, v in items.items():
-            tasks_codes[i].avilable = v["avilable"]
-            tasks_codes[i].avilable_updated = True
-            tasks_codes[i].data["Цена"] = v["price"]
-            tasks_codes[i].data["Личные_заметки"] = v["Личные_заметки"]
-            tasks_codes[i].save()
+            items = check_avil(driver, urls)
 
-        # restart driver
-        n += 1
+            print("complete", UaIkeaItems.select().where(UaIkeaItems.avilable_updated == True).count())
+            for i, v in items.items():
+                tasks_codes[i].avilable = v["avilable"]
+                tasks_codes[i].avilable_updated = True
+                tasks_codes[i].data["Цена"] = v["price"]
+                tasks_codes[i].data["Личные_заметки"] = v["Личные_заметки"]
+                tasks_codes[i].save()
 
-        if n > 50000:
-            n = 0
-            driver.quit()
-            driver = webdriver.Remote(
-                command_executor='http://dig.neafiol.site:4444/wd/hub',
-                desired_capabilities={
-                    "browserName": "chrome",
-                    "sessionTimeout": "5m"
-                },
-                options=chrome_options
-            )
+            # restart driver
+            n += 1
+
+            if n > 50000:
+                n = 0
+                driver.quit()
+                driver = webdriver.Remote(
+                    command_executor='http://dig.neafiol.site:4444/wd/hub',
+                    desired_capabilities={
+                        "browserName": "chrome",
+                        "sessionTimeout": "5m"
+                    },
+                    options=chrome_options
+                )
+
+        except Exception as e:
+            print(e)
+            try:
+                driver.quit()
+            except:
+                pass
+            driver = None
