@@ -52,25 +52,6 @@ def check_avil(driver, urls):
             except Exception as e:
                 # print(e)
                 time.sleep(0.5)
-
-    # driver.get("https://checkout.ua.ikea.com/uk/checkout")
-    # time.sleep(3)
-    # if driver.find_elements_by_id("NewAddress_FirstName"):
-    #     print("NewAddress_FirstName")
-    #     return items
-    #
-    # soup = BeautifulSoup(driver.page_source, 'html5lib')
-    # if not soup.tbody:
-    #     print("Access diend")
-    #     return items
-    #
-    # for item in soup.tbody.find_all("tr"):
-    #     if "Кількість" in str(item):
-    #         code = item.find("div", {"id": "itemNumber"}
-    #                          ).text.replace("Артикул номер: ", "").replace(".", "").strip("0")
-    #         items[code]["avilable"] = not item.td.span.input.has_attr("class")
-    #         items[code]["Личные_заметки"] = "Проверено в корзине"
-
     return items
 
 
@@ -108,7 +89,6 @@ if __name__ == "__main__":
     prefs = {"profile.managed_default_content_settings.images": 2}
     chrome_options.add_experimental_option("prefs", prefs)
     driver = None
-    # driver = webdriver.Firefox()
 
     n = 0
     while True:

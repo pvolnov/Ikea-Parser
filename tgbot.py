@@ -58,7 +58,7 @@ with open("search_text.pk", "rb") as f:
     SEARCH_TEXT = pickle.load(f)
 
 
-class MesssageStatus:
+class MessageStatus:
     LOAD_FROM_IKEA_1 = "PLsalre"
     LOAD_FROM_IKEA_2 = "Tovarnyak"
     LOAD_FROM_IKEA_3 = "Orgodom"
@@ -77,18 +77,18 @@ parsels_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
                                              one_time_keyboard=False,
                                              row_width=2)
 parsels_keyboard.add(
-    types.KeyboardButton(text=MesssageStatus.LOAD_FROM_IKEA_2),
-    types.KeyboardButton(text=MesssageStatus.LOAD_FROM_IKEA_3),
-    types.KeyboardButton(text=MesssageStatus.UPDATE_GOOGLE_SHEETS),
-    types.KeyboardButton(text=MesssageStatus.UPDATE_GOOGLE_TREKING),
-    types.KeyboardButton(text=MesssageStatus.DIFFERENCE),
-    types.KeyboardButton(text=MesssageStatus.UPDATE_UA),
-    types.KeyboardButton(text=MesssageStatus.UPDATE_PL),
+    types.KeyboardButton(text=MessageStatus.LOAD_FROM_IKEA_2),
+    types.KeyboardButton(text=MessageStatus.LOAD_FROM_IKEA_3),
+    types.KeyboardButton(text=MessageStatus.UPDATE_GOOGLE_SHEETS),
+    types.KeyboardButton(text=MessageStatus.UPDATE_GOOGLE_TREKING),
+    types.KeyboardButton(text=MessageStatus.DIFFERENCE),
+    types.KeyboardButton(text=MessageStatus.UPDATE_UA),
+    types.KeyboardButton(text=MessageStatus.UPDATE_PL),
 )
 
 parsels_keyboard.add(
-    types.KeyboardButton(text=MesssageStatus.DATA_FROM_IKEA_PL),
-    types.KeyboardButton(text=MesssageStatus.DATA_FROM_IKEA_UA))
+    types.KeyboardButton(text=MessageStatus.DATA_FROM_IKEA_PL),
+    types.KeyboardButton(text=MessageStatus.DATA_FROM_IKEA_UA))
 
 
 def get_url_cost(code: str):
@@ -152,7 +152,7 @@ def update_delivery():
     doc = doc.rename(columns=DEV_STATUS_TRANS)
     doc.to_csv("data.csv")
 
-    with open('data.csv', 'r') as file_obj:
+    with open('data/data.csv', 'r') as file_obj:
         content = file_obj.read().encode('utf-8')
         client.import_csv(spreadsheet.id, data=content)
 
@@ -325,7 +325,7 @@ def get_ua_items(ignore_codes=[], mode="UA"):
             del item["Примечание"]
 
     df1.to_csv('Export Groups Sheet.csv', index=False)
-    pd.DataFrame.from_dict(result).to_csv('Export Products Sheet.csv', index=False)
+    pd.DataFrame.from_dict(result).to_csv('data/Export Products Sheet.csv', index=False)
 
     merge_all_to_a_book(['Export Products Sheet.csv', 'Export Groups Sheet.csv'], "output.xlsx")
 
@@ -394,7 +394,7 @@ def new_doc(message):
     doc = pd.read_excel('file.xlsx').fillna("").to_dict('records')
     bot.reply_to(message, f"Загружен файл ({len(doc)} строк)")
 
-    if user.mst == MesssageStatus.DIFFERENCE:
+    if user.mst == MessageStatus.DIFFERENCE:
         codes = []
         for d in doc:
             if d['Производитель'] == "IKEA":
@@ -403,7 +403,7 @@ def new_doc(message):
         with open("output.xlsx", "rb") as f:
             bot.send_document(message.chat.id, f, caption="Остаточные данные с ikea.ua")
 
-    if user.mst == MesssageStatus.LOAD_FROM_IKEA_1:
+    if user.mst == MessageStatus.LOAD_FROM_IKEA_1:
         avilable_code = IkeaItems.select(IkeaItems.code).execute()
         avilable_code = set([i.code for i in avilable_code])
         print("New doc")
@@ -422,8 +422,8 @@ def new_doc(message):
         with open("res.xlsx", "rb") as f:
             bot.send_document(message.chat.id, f, caption="Данные с заполненной колонкой наличия")
 
-    elif user.mst in [MesssageStatus.UPDATE_UA, MesssageStatus.UPDATE_PL]:
-        mode = "PL" if user.mst == MesssageStatus.UPDATE_PL else "UA"
+    elif user.mst in [MessageStatus.UPDATE_UA, MessageStatus.UPDATE_PL]:
+        mode = "PL" if user.mst == MessageStatus.UPDATE_PL else "UA"
         print("Updating with mode: %s" % mode)
         bot.send_message(message.chat.id, f"В файле {len(doc)} товаров")
         if mode == "UA":
@@ -469,26 +469,26 @@ def text_mes(message):
         bot.send_message(message.chat.id, "Бот не активирован")
         return
 
-    if message.text in [MesssageStatus.LOAD_FROM_IKEA_1, MesssageStatus.LOAD_FROM_IKEA_2,
-                        MesssageStatus.LOAD_FROM_IKEA_3, MesssageStatus.LOAD_FROM_IKEA_4,
-                        MesssageStatus.LOAD_FROM_IKEA_5]:
-        u.mst = MesssageStatus.LOAD_FROM_IKEA_1
+    if message.text in [MessageStatus.LOAD_FROM_IKEA_1, MessageStatus.LOAD_FROM_IKEA_2,
+                        MessageStatus.LOAD_FROM_IKEA_3, MessageStatus.LOAD_FROM_IKEA_4,
+                        MessageStatus.LOAD_FROM_IKEA_5]:
+        u.mst = MessageStatus.LOAD_FROM_IKEA_1
         bot.send_message(u.tel_id, "Пришлите файл для обновления информации о наличии товаров")
 
-    elif message.text == MesssageStatus.UPDATE_GOOGLE_TREKING:
+    elif message.text == MessageStatus.UPDATE_GOOGLE_TREKING:
         n = update_delivery()
         bot.send_message(u.tel_id, f"Список посылок обновлен, всего {n} посылок")
-    elif message.text == MesssageStatus.UPDATE_GOOGLE_SHEETS:
+    elif message.text == MessageStatus.UPDATE_GOOGLE_SHEETS:
         update_google_sheets()
         bot.send_message(u.tel_id, "Таблица обновлена")
 
-    elif message.text == MesssageStatus.DIFFERENCE:
-        u.mst = MesssageStatus.DIFFERENCE
+    elif message.text == MessageStatus.DIFFERENCE:
+        u.mst = MessageStatus.DIFFERENCE
         bot.send_message(u.tel_id, "Пришлите файл для которого нужно уточнить разницу")
 
-    elif message.text in [MesssageStatus.DATA_FROM_IKEA_UA, MesssageStatus.DATA_FROM_IKEA_PL]:
+    elif message.text in [MessageStatus.DATA_FROM_IKEA_UA, MessageStatus.DATA_FROM_IKEA_PL]:
         bot.send_message(message.chat.id, "Начали готовить файлы, подождите пару минут")
-        if message.text == MesssageStatus.DATA_FROM_IKEA_UA:
+        if message.text == MessageStatus.DATA_FROM_IKEA_UA:
             get_ua_items(mode="UA")
         else:
             get_ua_items(mode="PL")
@@ -496,7 +496,7 @@ def text_mes(message):
         with open("output.xlsx", "rb") as f:
             bot.send_document(message.chat.id, f, caption="Актуальные данные с ikea.ua")
 
-    elif message.text in [MesssageStatus.UPDATE_UA, MesssageStatus.UPDATE_PL]:
+    elif message.text in [MessageStatus.UPDATE_UA, MessageStatus.UPDATE_PL]:
         u.mst = message.text
         bot.send_message(message.chat.id, "Пришлите файл .xlsx с обязательной колонкой `Код_товара`")
     else:

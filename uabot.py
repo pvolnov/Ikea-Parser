@@ -1,16 +1,13 @@
 import re
-import re
 import time
 
 import requests
 from bs4 import BeautifulSoup
 from peewee import EXCLUDED
 from selenium import webdriver
-from selenium.webdriver import DesiredCapabilities
 from tqdm import tqdm
 
 from bot.models import UaIkeaItems, PlIkeaItems
-from langdetect import detect
 
 
 def get_translate(code):
@@ -89,21 +86,6 @@ def mtranslate(driver, item, tags):
     return res, tags2
 
 
-def get_google_translate(text):
-    pass
-    # from google.cloud import translate_v2 as translate
-    #
-    # translate_client = translate.Client()
-    #
-    # if isinstance(text, six.binary_type):
-    #     text = text.decode("utf-8")
-    #
-
-    # result = translate_client.translate(text, target_language=target)
-    #
-    # print(u"Text: {}".format(result["input"]))
-
-
 def parse_ikea_page(url):
     data = {
         "Тип_товара": "r",
@@ -116,12 +98,6 @@ def parse_ikea_page(url):
     soup = BeautifulSoup(page, 'html5lib')
 
     data["Код_товара"] = re.search(r"\d+", url.split("-")[-1]).group(0)
-    # name = soup.title.text
-    # if "ikea" in name.lower():
-    #     name2 = ",".join(list(filter(lambda x: "ikea" not in x.lower(), re.split('\.|,', name))))
-    #     if not name2:
-    #         name2 = name.replace(name.split("-")[-1], "")
-    #     name = name2
 
     data["Описание"] = soup.find("meta", {"name": "description"})["content"]
     data["Название_позиции"] = data["Описание"].split(".")[0]
@@ -159,7 +135,7 @@ def get_items_links(url="https://www.ikea.com/pl/pl/cat/tovari-products/"):
     for u in tqdm(urls):
         if u['href'] in done:
             continue
-        driver.get(u['href']+"?page=20")
+        driver.get(u['href'] + "?page=20")
         time.sleep(3)
 
         soup = BeautifulSoup(driver.page_source, 'html5lib')
@@ -178,31 +154,9 @@ def get_items_links(url="https://www.ikea.com/pl/pl/cat/tovari-products/"):
 if __name__ == "__main__":
     driver = webdriver.Firefox()
 
-    # items = PlIkeaItems.select().execute()
-    # for i in tqdm(items[2871:]):
-    #     try:
-    #         item, tags = parse_ikea_page(i.url)
-    #     except Exception as e:
-    #         print(e)
-    #         continue
-    #     i.data["Цена"] = item["Цена"]
-    #     i.data["Название_позиции"] = ",".join(
-    #         list(filter(lambda x: "ikea" not in x.lower(), re.split('\.|,', item["Название_позиции"]))))
-    #
-    #     if detect(i.data["Описание"]) != "ru":
-    #         it, tags = mtranslate(driver, item, tags)
-    #         i.data.update(it)
-    #         i.tags = tags
-    #         i.save()
-
     mode = "PL"
-    for mode in ["UA","PL"]:
+    for mode in ["UA", "PL"]:
         print("RUN WITH MODE", mode)
-
-        # driver = webdriver.Remote(
-        #     # command_executor='http://dig2.neafiol.site:4444/wd/hub',
-        #     command_executor='http://127.0.0.1:4444/wd/hub',
-        #     desired_capabilities=DesiredCapabilities.CHROME)
 
         if mode == "UA":
             uitems = get_items_links("https://www.ikea.com/ua/uk/cat/tovari-products/")

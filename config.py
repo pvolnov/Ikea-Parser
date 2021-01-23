@@ -1,3 +1,15 @@
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+FORMAT = '%(levelname)s: %(message)s'
+handler.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(handler)
+
+logger.debug('Run config file')
+
 client_id = "403903445695-juercfio7dt7d1vpnqv4iihpk1fv8dgi.apps.googleusercontent.com"
 client_secret = "OT56q_gN4U5wcoVck1jk9nB_"
 
