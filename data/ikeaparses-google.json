@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "ikeaparses",
+  "private_key_id": "3cf41c8feff4331823840a04b26fdec9dbdbd6f2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgN3xKeSkudLg8\ny4+PCJ8uf83uynVYuaRWWnyG7ZDMbxz3sfBKsBGK9jIvUuKDgDUTodmyBceZ1km/\nSK6qVVTSigRThGiBp8mnkNZ8gLJbn+EzueIhBI3F0jlTcmZ9DlKf+QLvw1Xf4+qn\nJX4zome1P5fmYOAQC0i4iNFPr73W6t5erJfPc65uojZ/DT4yr2swQlQ0HxCprnXL\nT8gbJtm637bUrekSweZbZfoQNEisMqsWHvxbUsokR91FzSm8/kXl+jzcYq4aWt8M\nqEQYueZqrP1lzHGtMcgs9QT7t45N4l9k3ZXv9wHpVaHg6sfVAIl9QpMFQUPZzwQu\nBe1agLNrAgMBAAECggEADOvcqM7zvMzqDPEn31PFLsVc8OzAIQs7z0EV+PXQ70Po\n1Kszo3pmt8vaSUnIfe2Jmk871Ok1a1lGclhkydT+9cnuxmOP4CENmOeL/NeOSuhu\ni7Lqo1oQKwuk1u+Lh3tvu3okO/0HgHqLsrZJ4tUuwwXhdNGMUI7wav2Rz/ju+RWw\nZG4s7k7qayJblSSW+1IBmOMbThGrm/5w7wk1051agu6yU2/1+SSyedOJOytRP44S\n196G3OuVO4mM8AkYgEZYI/ALPIxaqtn1re5X2xDxUexMj0YOVekW9986XHrI8SZr\nSuxEcm7dfob4Az26vpGDYNLUl4K9tk9OsP+HA3WF2QKBgQDX9l4/V1LeYC9mJTnv\nxcxWlP+Su8BwxEA9URKIHHjFn+WAL2LXUwowlDnlvfraxjo/qXUytxCkGAWzQBnQ\nqwR5BI06+5+v5HhQwxgW1KrHEAkGbKxW69uBO8hTWPt1izueLnCFSUi2d3G6c8Ew\nMAa04G97/LvOGzY6IRu7FxnGEwKBgQC962onVVXixh9gCA9Pfsi8dgdwQuxoW7R0\nOPFV8bDbfvXLHWWLBgk+XKPhCx7LW9HlHmAVXxKN7xAh9CpsEBHy77R88f/8Vfd0\nKYwFlAi13tYekJL8UNoMe878eyHvD73P8b4/VQeQFOXjTKCGEpIJxvoC2AW6RteD\nAbERQYLoSQKBgFjuz6jt4OZKXbqGofEnVxpgiU53mqvVZU7az/LVJrbbPbsnyGA7\nhfqzT5RYQ7FL6DjHI8gasvOgINjMENVpV5IuWapsbDoWr6Uycf0U3q7S36SRo/a3\ncdEqOTh5cDPbflWJcjSxFQxu65qIiIm7fUeHFOHOFdiuRAp0D+Nfg/GZAoGBAJBi\niTGeDs15EiFP/1PQb4vXr5AJUPGFxosVP2S3el1lCDiDAM/QpvZiN7S/X4n7JHer\nwCB/Rvvg48LsfdPp47ttwSm8UYDlWltVur4C7RxXbTGPeC+ayCr1dUc91W6J6SRO\nBPThD/7Z5GwJtYA4Xg5Q14GR+cjEUtOmVZdo1r0BAoGAZ7DvczZlOz5nipHM53Bm\nsrniqa2N1FySHGcn35hhYh9H+iSeUqNgbrf+x/AYVkZ2x3iO6fJk1lG5lVLIyUn6\nbPfymjB6AQoQateCfWrPI/jcH0DADPnJF1vyy+ZYFmiI3GB5/m30s3UdZP6njev9\nC70KJPlwv8mN3P5KIKmT6pA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "ikea-delivery@ikeaparses.iam.gserviceaccount.com",
+  "client_id": "110713082068575681766",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ikea-delivery%40ikeaparses.iam.gserviceaccount.com"
+}
