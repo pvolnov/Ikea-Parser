@@ -1,4 +1,32 @@
 
+import os
+import re
+
+PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
+
+# -----------------------------------------------
+# Telegram bot settings
+
+TELEGRAM_BOT_TOKEN = "1542891280:AAH01-Jx2fvvTZKeV1pBzAnAknYWA3ip1q4"
+TELEGRAM_BOT_PASS = "admin4t"
+
+
+class MessageStatus:
+    LOAD_FROM_IKEA_1 = "PLsalre"
+    LOAD_FROM_IKEA_2 = "Tovarnyak"
+    LOAD_FROM_IKEA_3 = "Orgodom"
+    LOAD_FROM_IKEA_4 = "Markett"
+    LOAD_FROM_IKEA_5 = "DomComfort"
+    UPDATE_GOOGLE_SHEETS = "Update google table Ⓖ"
+    UPDATE_GOOGLE_TREKING = "Treking update 🧳"
+    DIFFERENCE = "Difference 📏"
+    UPDATE_UA = "Наличие в ikea.ua 🗳"
+    UPDATE_PL = "Наличие в ikea.pl 🗳"
+    DATA_FROM_IKEA_UA = "Слепок всей ikea.ua 📥"
+    DATA_FROM_IKEA_PL = "Слепок всей ikea.pl 📥"
+
+
+# -----------------------------------------------
 # DB settings
 DB_NAME = 'ikea'
 DB_USER = 'postgres'

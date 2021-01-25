@@ -62,7 +62,6 @@ class PlIkeaItems(BaseModel):
     is_failed = BooleanField(default=False)
 
 
-
 class TgUsers(BaseModel):
     tel_id = BigIntegerField(unique=True)
     mst = TextField(default="")

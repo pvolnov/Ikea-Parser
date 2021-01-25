@@ -1,4 +1,4 @@
-from app.config import logger
+from app.logging_config import logger
 
 
 def main():

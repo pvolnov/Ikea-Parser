@@ -9,12 +9,28 @@ import re
 import time
 import requests
 from bs4 import BeautifulSoup
+from enum import Enum
+
+
+class Language(Enum):
+    RU = 'RU'
+    UA = 'UA'
+    PL = 'PL'
 
 
 class Translator:
 
     @staticmethod
-    def mtranslate(driver, item, tags):
+    def translate(driver, item: dict, original: Language = None, target: Language = None):
+        if target == Language.RU and original == Language.PL:
+            return {
+                key: Translator.get_translate_mtranslator(driver, text)
+                for key, text in item.items()
+            }
+        raise NotImplementedError
+
+    @staticmethod
+    def mtranslate_pl_ru(driver, item, tags):
         res = {}
         driver.get(f"https://www.m-translate.ru/translator/text#text=test&direction=pl-ru")
         res["Описание"] = Translator.get_translate_mtranslator(driver, item["Описание"])
@@ -26,10 +42,11 @@ class Translator:
 
     @staticmethod
     def get_translate_mtranslator(driver, text):
-        time.sleep(0.2)
-        driver.find_element_by_id("text").clear()
-        driver.find_element_by_id("text").send_keys(text)
-        driver.find_element_by_id("go_btn").click()
+        driver.get(f"https://www.m-translate.ru/translator/text#text={text}&direction=pl-ru")
+        # time.sleep(0.2)
+        # driver.find_element_by_id("text").clear()
+        # driver.find_element_by_id("text").send_keys(text)
+        # driver.find_element_by_id("go_btn").click()
         while driver.find_element_by_id("text_out").get_attribute("value") == "":
             time.sleep(0.2)
         return driver.find_element_by_id("text_out").get_attribute("value")

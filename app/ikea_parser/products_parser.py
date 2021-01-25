@@ -14,10 +14,8 @@ from contextlib import suppress
 
 from app.models import UaIkeaItems, PlIkeaItems
 from app.logging_config import logger
-from app.translator import Translator
 from app.ikea_parser.parser_utils import ParserUtils
-from app.ikea_parser.ukraine import get_translate_ikea_club
-from polish import translate_product
+from app.db import IkeaProduct, current_session as s
 
 
 class CountryCode(Enum):
@@ -30,7 +28,7 @@ class ProductsParser:
         self.driver = None
 
     def init_driver(self):
-        self.driver = webdriver.Firefox(executable_path='../../data/geckodriver')
+        self.driver = webdriver.Firefox(executable_path='../data/geckodriver')
 
     def quit_driver(self):
         self.driver.quit()
@@ -46,7 +44,8 @@ class ProductsParser:
         """
         return ParserUtils.get_items_links(self.driver, categories_url)
 
-    def parse_product(self, country: CountryCode, cut_product) -> dict:
+    @staticmethod
+    def parse_product(country: CountryCode, cut_product) -> dict:
         data, tags = ParserUtils.parse_ikea_page(cut_product['url'])
         item = cut_product
         item['data'] = data
@@ -139,6 +138,16 @@ class ProductsParser:
                 logger.exception('Fail to update %s products', country)
 
         self.quit_driver()
+
+    def translate_pl_generator(self, limit=1):
+        products = s.query(IkeaProduct).filter(IkeaProduct.country == CountryCode.PL.value,
+                                               IkeaProduct.ru_data.is_(None))\
+            .limit(limit).count()
+        print(products)
+        # for product in products:
+        #     print(product)
+            # data = product.pl_data
+            # print(data)
 
     def __del__(self):
         with suppress(Exception):

@@ -11,3 +11,7 @@ test.py
 build
 dist
 bot.spec
+*.sql
+*.xls
+*.csv
+*.xlsx
