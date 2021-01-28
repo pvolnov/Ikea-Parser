@@ -16,3 +16,4 @@ bot.spec
 *.csv
 *.xlsx
 *.json
+.scrapy
