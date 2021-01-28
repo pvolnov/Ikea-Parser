@@ -1,0 +1,10 @@
+{
+ "code": 8,
+ "message": "limit on requests was exceeded. Limit: 20, Interval: 1s",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.RequestInfo",
+   "requestId": "35e3b3fb-b69b-9b23-9ca8-d7fd0ac9b3b7"
+  }
+ ]
+}

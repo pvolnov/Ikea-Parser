@@ -7,7 +7,7 @@ def translate_product(driver, item, tags):
     ni, tags2 = get_translate_ikea_club(item['code'])
     if ni:
         tags = tags2
-        item.update(ni)
+        item.iter_update(ni)
     else:
         item, tags = Translator.mtranslate(driver, item, tags)
         logger.debug("mtranslate done", item)

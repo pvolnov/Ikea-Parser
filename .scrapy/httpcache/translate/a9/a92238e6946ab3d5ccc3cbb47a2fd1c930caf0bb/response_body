@@ -1,0 +1,10 @@
+{
+ "code": 8,
+ "message": "limit on units was exceeded. Limit: 1000000, Interval: 1h0m0s",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.RequestInfo",
+   "requestId": "fc4b39b0-402d-925a-ae71-d33c83307062"
+  }
+ ]
+}

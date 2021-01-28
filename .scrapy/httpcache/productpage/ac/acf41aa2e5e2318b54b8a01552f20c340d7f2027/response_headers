@@ -1,0 +1,25 @@
+Server: IKEA Server
+Content-Type: text/html; charset=utf-8
+Set-Cookie: ikea_geo=RO; path=/pl/pl/; secure
+Set-Cookie: _abck=1F23A33A3098F2818AFFAD1BAA235D1D~-1~YAAQjxdlX07klj53AQAAhORYRQUbHUp0PWbHD2YCK+vy0aWt/lxfxeYlryvqJojjpWCU/4V6TpChcHro0uJz6oD68XP3L/KDFqry7t//a+jJC9FCze2bw+X8iMgrMDoIi2FOh85rRDrZlf0q+sGwJEOatTcbbyBmGGZZuMghkEJsXF8v1nP6l/ssLowzc35IWaIU5RloRciKzUhsAu29agVdMjBMjcpe2EcwBJ7vW2V1I2TvOVMSxuQtytmaJbgmtm9oTIP1d+5a0PzEFa8aunn+MJT6938j4uHc4L1oXsgWJD/kjF1n8w==~-1~-1~-1; Domain=.ikea.com; Path=/; Expires=Thu, 27 Jan 2022 19:36:29 GMT; Max-Age=31536000; Secure
+Set-Cookie: bm_sz=EE30C1C2DB196D6626A1242542F1F72E~YAAQjxdlX03klj53AQAAhORYRQoIirF6g/m19Mv2eWFl3p9tlsOZullLeNlhfm6mzLw6QbOi2+rtU4sINnOn+B3TC7jqt/GF7w7Zc4SXlNBdrBlnDuzCT77VL+2KJghfJCK+3vS5mGxPVjqCqNHXBVvKYkZFZ9Uhwj41Sz3naEkSyGGpMXq0wH+gl9pfvw==; Domain=.ikea.com; Path=/; Expires=Wed, 27 Jan 2021 23:36:29 GMT; Max-Age=14400; HttpOnly
+X-Amz-Replication-Status: COMPLETED
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+X-Content-Type-Options: nosniff
+Server-Timing: edge; dur=81
+Server-Timing: cdn-cache; desc=HIT
+X-Amz-Cf-Id: 73pCEhdyr9L5jf0QBhhCOOaIqv7Wtsh5Izxx18huPi2cv0MaEPUACA==
+X-Amz-Cf-Pop: FRA56-C1
+Etag: "c91c31c36ba57bd8ebb03e5823f1adb4"
+X-Amz-Version-Id: IQ9vE6ZON2hyH5vvpRGsixTAATPd6kBG
+X-Amz-Meta-Edge-Cache-Tag: pub-pl-pl-products,pub-pl-pl-products-s69401081,pub-pl-pl-products-081
+X-Amz-Meta-Shard: 
+X-Amz-Meta-Md5: c91c31c36ba57bd8ebb03e5823f1adb4
+X-Akamai-Transformed: 9 140176 0 pmb=mTOE,1
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Cache-Control: max-age=900
+Expires: Wed, 27 Jan 2021 19:51:30 GMT
+Date: Wed, 27 Jan 2021 19:36:30 GMT

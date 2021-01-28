@@ -1,6 +1,6 @@
-
 import os
 import re
+from enum import Enum
 
 PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
 
@@ -22,8 +22,13 @@ class MessageStatus:
     DIFFERENCE = "Difference 📏"
     UPDATE_UA = "Наличие в ikea.ua 🗳"
     UPDATE_PL = "Наличие в ikea.pl 🗳"
-    DATA_FROM_IKEA_UA = "Слепок всей ikea.ua 📥"
-    DATA_FROM_IKEA_PL = "Слепок всей ikea.pl 📥"
+    DATA_FROM_IKEA_UA = "Слепок всей ikea.ua"
+    DATA_FROM_IKEA_PL = "Слепок всей ikea.pl"
+
+
+class CountryCode(Enum):
+    UA = 'UA'
+    PL = 'PL'
 
 
 # -----------------------------------------------

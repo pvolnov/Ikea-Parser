@@ -1,0 +1,5 @@
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en
+User-Agent: Scrapy/2.4.1 (+https://scrapy.org)
+Accept-Encoding: gzip, deflate
+Cookie: ikea_geo=RO; _abck=529A9019A4EF2A64D09952DAE7B50839~-1~YAAQLUlnaJr7AEN3AQAA8TFZRQX4CXQu2Z/zwN24hnFfLrZ53lAhIg7dNZ4F6hB/uZBGxKKc63eSCQ+IjZqoK5JIRkv0mcnApUm9CYBbXAxJY9UzhlQPC2fmZ0InfEF05fqMC+s4RfcciSoMuztTHy9Ik/C+uu0G0qogKTKpvEEgJxiR18ROyURxx36Llfl0rWLBDcDuF+TcpU2Sow0h4PdVJ+2221VsaAl5TIh6hiPk+xtrtIxbaHLT3KzjObRquO3VG88S2+6/x1a2fidd9V/6eVstTXocoTSBydMwr1tGwm0NhMldNw==~-1~-1~-1; bm_sz=ADFA6B416FD4340AEE34847A9494C6F3~YAAQLUlnaJn7AEN3AQAA8TFZRQo7CY1b2L/JS7Uo7RseXT6cbSszYrrW1xnA3WbT7PlQMIMYervGmLgyPMoN5/DEmjV2Se120s9tk8AZ50r8lVl3BJWvMO+1Rd05X1GATG5niSvwfO2NuZBWDE/rkW6e3V4V4zvoA7FF8K6bTJvY+NCNuERDS1TGQTOnSg==

@@ -1,0 +1,20 @@
+Server: IKEA Server
+Content-Type: text/html
+Location: https://www.ikea.com/ua/uk/cat/metod-metod-sistema-23598/
+X-Amz-Replication-Status: COMPLETED
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+X-Content-Type-Options: nosniff
+Server-Timing: edge; dur=10
+Server-Timing: cdn-cache; desc=HIT
+X-Amz-Cf-Id: GuYgGEh5CI3dkk1LUOhWn5UTXfMHIKQmOvPeqv51v0gsMK-rXwa_zw==
+X-Amz-Cf-Pop: AMS1-C1
+X-Amz-Version-Id: aN5v7D9.80R3J9EAfIuSfjDlQgY08cuu
+X-Amz-Meta-Edge-Cache-Tag: pub-ua-uk-product-lists,pub-ua-uk-product-lists-24254
+X-Amz-Meta-Shard: shardId-000000000006
+X-Amz-Meta-Md5: 086cfea7557df8c4b25acd49054331c0
+Etag: "086cfea7557df8c4b25acd49054331c0"
+Cache-Control: max-age=900
+Expires: Tue, 26 Jan 2021 13:40:34 GMT
+Date: Tue, 26 Jan 2021 13:25:34 GMT

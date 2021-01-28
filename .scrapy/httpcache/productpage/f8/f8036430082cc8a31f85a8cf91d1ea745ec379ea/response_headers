@@ -1,0 +1,22 @@
+Server: IKEA Server
+Content-Type: text/html; charset=utf-8
+X-Amz-Replication-Status: COMPLETED
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+X-Content-Type-Options: nosniff
+Server-Timing: edge; dur=28
+Server-Timing: cdn-cache; desc=HIT
+X-Amz-Cf-Id: 8GLbC-ylsFUOpPThq0zgoHFr_My0qOiFTpOUPasnZFTSX_QczOB-EQ==
+X-Amz-Cf-Pop: FRA56-C1
+Etag: "58b98b67c6cfe46a03e700e4b1bef2ff"
+X-Amz-Version-Id: iM_pkw8bOk4ParMOBmr1AmQxhh2UK07X
+X-Amz-Meta-Edge-Cache-Tag: pub-ua-uk-products,pub-ua-uk-products-50464714,pub-ua-uk-products-714
+X-Amz-Meta-Shard: 
+X-Amz-Meta-Md5: 58b98b67c6cfe46a03e700e4b1bef2ff
+X-Akamai-Transformed: 9 119275 0 pmb=mTOE,1
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Cache-Control: max-age=900
+Expires: Wed, 27 Jan 2021 20:07:54 GMT
+Date: Wed, 27 Jan 2021 19:52:54 GMT

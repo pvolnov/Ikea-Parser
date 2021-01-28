@@ -9,7 +9,7 @@ from contextlib import suppress
 
 from app.models import UaIkeaItems, PlIkeaItems
 from app.logging_config import logger
-from app.ikea_parser.parser_utils import Parser
+from app.parser_utils import Parser
 
 
 def update_available_pile():

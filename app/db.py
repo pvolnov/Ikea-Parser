@@ -1,23 +1,52 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import ARRAY, BigInteger, Boolean, Column, Integer, JSON, Text, text, String
+from sqlalchemy import ARRAY, BigInteger, Boolean, Column, Integer, JSON, Text, text, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+import datetime
 from dotenv import load_dotenv, find_dotenv
 import os
 from contextlib import contextmanager
 
+import sqlalchemy as sa
+import sqlalchemy.orm as orm
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 load_dotenv()
 
 DB_URL = os.environ['DB_URL']
-engine = create_engine(DB_URL, convert_unicode=True)
+engine = create_engine(DB_URL, convert_unicode=True, echo=True)
 Session = sessionmaker(autocommit=False,
                        autoflush=False,
+                       expire_on_commit=False,
                        bind=engine)
 
-Base = declarative_base()
+Session = scoped_session(Session)
+
+
+class BaseMixin(object):
+    query = Session.query_property()
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    def to_dict(self):
+        d = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            if value is not None:
+                d[column.name] = value
+
+        return d
+
+
+Base = declarative_base(bind=engine, cls=BaseMixin)
 
 current_session = scoped_session(Session)
+
 
 @contextmanager
 def session_scope():
@@ -57,14 +86,17 @@ class IkeaProduct(Base):
     __tablename__ = 'ikeaproduct'
 
     id = Column(Integer, primary_key=True)
+    create_date = Column(DateTime, default=datetime.datetime.utcnow)
     url = Column(String(300), nullable=False, unique=True)
     code = Column(String(50), nullable=False, unique=False)
     country = Column(String(5), nullable=False)
-    data = Column(JSON, nullable=True, default=None)
-    ru_data = Column(JSON, nullable=True, default=None)
-    pl_data = Column(JSON, nullable=True, default=None)
-    ua_data = Column(JSON, nullable=True, default=None)
-    is_failed = Column(Boolean, server_default=text("false"))
+    data = Column(JSON, nullable=True)
+    ru_data = Column(JSON, nullable=True)
+    pl_data = Column(JSON, nullable=True)
+    ua_data = Column(JSON, nullable=True)
+    is_available = Column(Boolean, nullable=True)
+    is_failed = Column(Boolean, default=False)
+    is_new = Column(Boolean, default=True)
 
 
 class Plikeaitem(Base):
