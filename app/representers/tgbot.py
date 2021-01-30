@@ -164,4 +164,5 @@ def start_pooling():
 
 
 if __name__ == "__main__":
+    import os
     start_pooling()
