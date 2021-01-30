@@ -1,3 +1,6 @@
+run in heroku
+git push heroku heroku:master
+
 # Ikea parser
 *Проект на фрилансе*
 
