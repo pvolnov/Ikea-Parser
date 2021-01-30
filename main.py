@@ -13,10 +13,7 @@ from scrapy.utils.project import get_project_settings
 
 from app.logging_config import logger
 from app.representers.tgbot import start_pooling
-from app.updaters.translate_updater import TranslateUpdater
-from app.updaters.check_is_available_updater import CheckAvailableRowsUpdater
 import func_timeout
-from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Process
 
 
@@ -70,7 +67,5 @@ class SimpleInfiniteRunner:
 
 if __name__ == '__main__':
     runner = SimpleInfiniteRunner()
-    #runner.add(run_updater, TranslateUpdater(limit=10))
-    #runner.add(run_updater, CheckAvailableRowsUpdater(limit=10, drivers_count=1))
     runner.add(start_pooling)
     runner.start()

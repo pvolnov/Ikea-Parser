@@ -1,0 +1,5 @@
+git add .
+git commit -am"auto"
+git push heroku heroku:master
+heroku logs --tail
+
