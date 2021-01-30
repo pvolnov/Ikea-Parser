@@ -59,8 +59,10 @@ class CheckAvailableRowsUpdater(RowsUpdater):
 
     model = IkeaProduct
     index_elements = ['url']
+    pipeline = True
 
     def __init__(self, *args, **kwargs):
+        self.drivers_count = kwargs.get('drivers_count', 1)
         super().__init__(*args, **kwargs)
 
     def get_query(self):
@@ -71,18 +73,38 @@ class CheckAvailableRowsUpdater(RowsUpdater):
                 IkeaProduct.ua_data.isnot(None)),
             IkeaProduct.is_available.is_(None))
 
-    def before(self):
-        self.driver = get_driver()
+    def before(self, *args, **kwargs):
+        n_drivers = self.drivers_count
+
+        self.drivers = [
+            get_driver()
+            for i in range(n_drivers)
+        ]
 
     def after(self):
-        self.driver.quit()
+        # self.driver.quit()
+        for driver in self.drivers:
+            driver.quit()
 
     def handle_rows(self, rows):
         row_by_code = {
             row.code: row
             for row in rows
         }
-        items = self.check_avil(self.driver, [row.url for row in rows])
+        batch_size = len(rows) // len(self.drivers) + 1
+        urls = [row.url for row in rows]
+        urls_batches = [urls[x:batch_size+x] for x in range(0, len(rows), batch_size)]
+        from concurrent.futures import ThreadPoolExecutor
+
+        items = {}
+        with ThreadPoolExecutor(max_workers=len(self.drivers)) as executor:
+            threads = []
+            for driver, urls_butch in zip(self.drivers, urls_batches):
+                threads.append(executor.submit(self.check_avil, driver, urls_butch))
+
+            for thread in threads:
+                items.update(thread.result())
+
         for code, item in items.items():
             row = row_by_code[code]
             yield {
@@ -94,4 +116,4 @@ class CheckAvailableRowsUpdater(RowsUpdater):
 
 if __name__ == '__main__':
     while True:
-        CheckAvailableRowsUpdater(limit=5).update()
+        CheckAvailableRowsUpdater(limit=40).update()

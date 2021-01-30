@@ -29,7 +29,10 @@ logger.addHandler(handler)
 
 
 # Add alarmer telegram bot handler
-# tg_handler = TelegramLogsHandler(ALARMER_BOT_KEY)
-# tg_handler.setLevel(logging.ERROR)
-# tg_handler.setFormatter(logging.Formatter(TG_FORMAT))
-# logger.addHandler(tg_handler)
+tg_handler = TelegramLogsHandler(ALARMER_BOT_KEY)
+tg_handler.setLevel(logging.ERROR)
+tg_handler.setFormatter(logging.Formatter(TG_FORMAT))
+logger.addHandler(tg_handler)
+
+if __name__ == '__main__':
+    logger.error('TEST ERROR')

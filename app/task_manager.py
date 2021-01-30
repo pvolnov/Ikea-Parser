@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 from datetime import datetime, timedelta
 from time import sleep
-from logging_config import logger
+from app.logging_config import logger
 from hashlib import sha1
 import types
 

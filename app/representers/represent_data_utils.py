@@ -17,10 +17,11 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from pyexcel import merge_all_to_a_book
-from sqlalchemy import or_
+from sqlalchemy import or_, JSON, cast, String, literal
 from telebot import types
 from app.config import MessageStatus, PROJECT_DIR
 from app.logging_config import logger
+from app.utils import stringify
 
 PRICES = {
     10: 1.5,
@@ -88,19 +89,31 @@ def get_data(row):
     data = {}
     ru_data = row.ru_data or {}
 
+    ukr_fields = ['Название_позиции', 'Описание', 'Поисковые_запросы']
+
     data.update(
         {
-            key + ('_укр' if key in ru_data else ''): value
+            key: stringify(value)
+            for key, value in (row.pl_data or {}).items()
+            if key not in ru_data
+        }
+    )
+
+    data.update(
+        {
+            key + ('_укр' if key in ukr_fields else ''): stringify(value)
             for key, value in (row.ua_data or {}).items()
         }
     )
+
     data.update(
         {
-            key + ('_пол' if key in ru_data else ''): value
-            for key, value in (row.pl_data or {}).items()
+            key: stringify(value)
+            for key, value in ru_data.items()
         }
     )
-    data.update(row.ru_data or {})
+    print('data keys', data.keys())
+    print('ua items', row.ua_data.keys())
     return data
 
 
@@ -247,7 +260,10 @@ def save_xlsx(lines, filename):
 
 
 def get_tags(row):
-    return get_data(row)['tags']
+    tags = get_data(row).get('tags', [])
+    if isinstance(tags, list):
+        return tags
+    return tags.split(', ')
 
 
 # TODO Переписать тут все. Создать классы, и в них инкапсулировать логику
@@ -328,8 +344,12 @@ def save_ikea_product_to_csv(country, filename):
 def get_ua_items(ignore_codes=[], mode="UA"):
     items = s.query(IkeaProduct).filter(IkeaProduct.country == mode, IkeaProduct.is_failed == False,
                                         IkeaProduct.ru_data.isnot(None),
+                                        IkeaProduct.ua_data.isnot(None),
+                                        cast(IkeaProduct.ua_data, String) != cast(literal(None, JSON()), String),
                                         or_(IkeaProduct.ua_data.isnot(None), IkeaProduct.pl_data.isnot(None))).all()
 
+    for item in items:
+        print(item.to_dict().keys())
     groups, groups_lists = get_groups(items)
     df1 = pd.DataFrame.from_dict(groups)
 
@@ -358,7 +378,7 @@ def get_ua_items(ignore_codes=[], mode="UA"):
             else:
                 item['Наличие'] = "-"
 
-            pr = float(str(item["Цена"]).replace(" ", ""))
+            pr = float(re.search(r'\d*[.,]?\d*', item["Цена"]).group(0).replace(',', '.').replace(" ", ""))
             if mode == "UA":
                 for p in PRICES:
                     if p > pr:

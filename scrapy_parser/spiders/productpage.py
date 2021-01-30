@@ -2,12 +2,7 @@ import re
 
 import scrapy
 from bs4 import BeautifulSoup
-from scrapy.crawler import CrawlerRunner, CrawlerProcess
-from scrapy.utils.project import get_project_settings
-
 from app.db import session_scope, IkeaProduct
-from scrapy.shell import inspect_response
-
 from scrapy_parser.pipelines import DBUpdaterPipeline
 
 

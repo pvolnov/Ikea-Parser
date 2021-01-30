@@ -2,7 +2,8 @@ import os
 import re
 from enum import Enum
 
-PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
+PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
+# PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
 
 # -----------------------------------------------
 # Telegram bot settings
@@ -43,7 +44,7 @@ SB_PORT = 5432
 # Logging settings
 ALARMER_BOT_KEY = "104839-00cc49-791ee0"
 FORMAT = '%(funcName)s %(levelname)s: %(message)s'
-TG_FORMAT = 'PARSER %(levelname)s: %(message)s'
+TG_FORMAT = 'IKEA parser %(levelname)s: %(message)s'
 
 # -----------------------------------------------
 client_id = "403903445695-juercfio7dt7d1vpnqv4iihpk1fv8dgi.apps.googleusercontent.com"

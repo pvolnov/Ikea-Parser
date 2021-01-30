@@ -1,0 +1,11 @@
+#!/bin/bash
+while [ : ]
+do
+#pkill python
+#pkill firefox
+#pkill geckodriver
+/home/boris/.local/share/virtualenvs/Ikea-Parser-hPX3wiU0/bin/python /home/boris/LocalProjects/Ikea-Parser/main.py
+
+wait $!
+sleep 20
+done

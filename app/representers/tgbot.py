@@ -158,6 +158,10 @@ def text_mes(message):
     u.save()
 
 
-if __name__ == "__main__":
+def start_pooling():
     logger.info("Start bot pulling")
     bot.polling(none_stop=True, timeout=60)
+
+
+if __name__ == "__main__":
+    start_pooling()
