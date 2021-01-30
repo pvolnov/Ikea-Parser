@@ -70,7 +70,7 @@ class SimpleInfiniteRunner:
 
 if __name__ == '__main__':
     runner = SimpleInfiniteRunner()
-    runner.add(run_updater, TranslateUpdater(limit=10))
-    runner.add(run_updater, CheckAvailableRowsUpdater(limit=10, drivers_count=1))
-    # runner.add(start_pooling)
+    #runner.add(run_updater, TranslateUpdater(limit=10))
+    #runner.add(run_updater, CheckAvailableRowsUpdater(limit=10, drivers_count=1))
+    runner.add(start_pooling)
     runner.start()
