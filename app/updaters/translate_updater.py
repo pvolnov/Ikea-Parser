@@ -13,7 +13,6 @@ from app.updaters.base_updater import RowsUpdater
 from app.updaters.ikea_parser import get_driver
 from app.db import IkeaProduct
 from app.utils import get_dict, stringify
-from termcolor import colored
 import func_timeout
 
 
@@ -90,7 +89,7 @@ class SeleniumPerevodTranslator(BaseTranslator):
             for text in texts
         ]
 
-    def translate(self, url, text, retries_count=0):
+    def translate(self, url, text):
         self.driver.get(url, )
         time.sleep(0.2)
         self.driver.find_element_by_id("first_textarea").clear()
@@ -146,15 +145,10 @@ class TranslatorsLibTranslator(BaseTranslator):
             ts.google,
             ts.alibaba,
             ts.bing,
-            # Остальное на работает
-            # ts.sogou,
-            # ts.youdao,
-            # ts.baidu,
         ]
         for i in range(3):
             for translator_func in translators:
                 try:
-                    # print(colored(f'try translator: {translator_func.__name__}', 'yellow'))
                     return func_timeout.func_timeout(
                         15, translator_func, args=(text,),
                         kwargs={
@@ -164,9 +158,7 @@ class TranslatorsLibTranslator(BaseTranslator):
                     )
                 except FunctionTimedOut:
                     pass
-                    # print(colored(f'timed out', 'red'))
                 except:
-                    # print(colored(f'failed', 'red'))
                     pass
             time.sleep((i + 1) * randint(20, 30))
         raise Exception('Translation failed')
@@ -220,8 +212,6 @@ class TranslatorAdapter:
                 break
             except:
                 pass
-        # for tr, text in zip(translated_texts, texts):
-        # print(f'({target_lang.value}) {text}  ->  {tr}')
         try:
             assert len(translated_texts) == len(texts), f'result: {translated_texts}, source: {texts}'
         except:
@@ -284,11 +274,7 @@ class TranslateUpdater(RowsUpdater):
 
                 IkeaProduct.ua_data.is_(None),
                 IkeaProduct.ru_data.is_(None),
-            ),
-            # or_(
-            #     IkeaProduct.ua_data.is_(None),
-            #     IkeaProduct.ru_data.is_(None),
-            # )
+            )
         )
 
     def translate_row(self, data: dict):
@@ -300,18 +286,6 @@ class TranslateUpdater(RowsUpdater):
             if field in data and data[field]
         }
         return dict_to_translate
-
-    # def handle_rows(self, rows: list):
-    #     for
-    #
-    #     for row in rows:
-    #         row_data = self.row_to_translate(row)
-    #         translations[(row_data['source_lang'], row_data['target_lang'])].append(row_data['data'])
-    #
-    #     for lang_pair, translation_dicts in translations.items():
-    #         translated_dicts = self.translator.translate_dicts(translation_dicts, target_lang=lang_pair[1],
-    #                                                            source_lang=lang_pair[0])
-    #         assert len(translated_dicts) == len(translation_dicts) == len(rows)
 
     def handle_row(self, row: IkeaProduct):
         source = {}
@@ -344,29 +318,6 @@ class TranslateUpdater(RowsUpdater):
 
 
 if __name__ == '__main__':
-    # TranslateUpdater(limit=1).update()
-    # driver = get_driver()
-    # driver.get('https://www.google.com')
-    # driver.get('https://www.yandex.ru')
-    # driver.get('https://www.google.com')
-    # time.sleep(10)
-    # exit(0)
     for i in tqdm(TranslateUpdater(limit=10)):
         pass
-    # while True:
-    #     try:
-    #         TranslateUpdater(limit=10).update()
-    #     except:
-    #         logger.exception('Error in translate updater loop')
-    # translator = TranslatorAdapter()
-    # print(translator.translate_dicts([
-    #     {'hello': 'hello world', 'buy': 'Goodbye everyone'},
-    #     {'world': 'the world is big and round', 'man': 'Man big and fat!'},
-    # ], target_lang=Language.RU))
-    # t = TranslatorAdapter()
-    # s = SeleniumPerevodTranslator()
-    # # print(s.does_support_lang(target_lang=Language.EN, source_lang=Language.RU))
-    # print(t.translate_list_to(['Завтра отправляемся в дорогу', 'Он ушел не попрощавшись'],
-    #                           source_lang=Language.RU, target_lang=Language.EN))
-    # driver = get_driver()
-    # driver.driver.get('https://google.com')
+
