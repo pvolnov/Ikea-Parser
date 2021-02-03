@@ -3,9 +3,14 @@ import re
 from enum import Enum
 import os
 
-PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
 PROJECT_DIR = os.getcwd()
-# PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
+
+if 'heroku' not in os.environ:
+    # PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
+    PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
+
+# import sys
+# sys.path.append(os.path.join(PROJECT_DIR, 'data'))
 
 # -----------------------------------------------
 # Telegram bot settings

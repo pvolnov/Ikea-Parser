@@ -31,12 +31,15 @@ def translate_to_ru(texts_dict: dict):
     }
 
 
+class A:
+    def __iter__(self):
+        pass
+
+    def __next__(self):
+        pass
 if __name__ == '__main__':
-    print(translate_to_ru({
-        1: 'Exhausted!!!',
-        2: 'Where are you from?'
-    }))
-    print(translate_to_ru({
-        1: 'Exhausted!!!',
-        2: 'Where are you from?'
-    }))
+    import colorama
+    from colorama import Fore, Style
+
+    print(Fore.BLUE + "Hello World")
+

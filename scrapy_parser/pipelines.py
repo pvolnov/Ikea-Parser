@@ -5,14 +5,11 @@
 
 
 # useful for handling different item types with a single interface
-from pprint import pprint
+from colorama import Fore, Style
 
-from itemadapter import ItemAdapter
 from app.db import session_scope, IkeaProduct
 from app.logging_config import logger
-from app.config import CountryCode
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import UniqueConstraint
 
 
 class DBUpdaterPipeline:
@@ -22,6 +19,7 @@ class DBUpdaterPipeline:
         self.model = settings['model']
         self.index_elements = settings.get('index_elements')
         self.bunch_size = 20
+        self.index_hashes = set()
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -64,10 +62,18 @@ class DBUpdaterPipeline:
             s.commit()
             self.items = []
 
+    def _get_index_elements_hash(self, item):
+
+        return '.'.join(sorted(str(item.get(name)) for name in self.index_elements))
+
     def _handle_item(self, item):
-        self.items.append(item)
-        if len(self.items) > self.bunch_size:
-            self.upload_items()
+        if self._get_index_elements_hash(item) in self.index_hashes:
+            logger.info('ПОВТОРЕНИЕ ПО ИНТЕКСУ')
+        else:
+            self.index_hashes.add(self._get_index_elements_hash(item))
+            self.items.append(item)
+            if len(self.items) > self.bunch_size:
+                self.upload_items()
 
     def close_spider(self, spider=None):
         self.upload_items()
@@ -105,3 +111,10 @@ if __name__ == '__main__':
     with session_scope() as s:
         rows = s.query(IkeaProduct).filter(IkeaProduct.url.like('%www.example%')).delete(synchronize_session=False)
         print(rows)
+
+if __name__ == '__main__':
+    p = DBUpdaterPipeline(settings={'model': IkeaProduct,
+                                    'index_elements': ['url']})
+    print(p._get_index_elements_hash({'url':123}))
+    # p.process_item({'url': 123})
+    # p.process_item({'url': 321})

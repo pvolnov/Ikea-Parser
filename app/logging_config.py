@@ -14,7 +14,10 @@ class TelegramLogsHandler(logging.Handler):
     def send_message(self, text):
         template = 'https://alarmerbot.ru/?key={key}&message={message}'
         url = template.format(key=self.api_key, message=quote(text))
-        requests.get(url)
+        try:
+            requests.get(url)
+        except requests.exceptions.ConnectionError:
+            pass
 
     def emit(self, record):
         log_entry = self.format(record)
@@ -22,7 +25,7 @@ class TelegramLogsHandler(logging.Handler):
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(handler)

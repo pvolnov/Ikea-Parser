@@ -7,6 +7,7 @@ import datetime
 from dotenv import load_dotenv, find_dotenv
 import os
 from contextlib import contextmanager
+from sqlalchemy_mixins import ActiveRecordMixin, ReprMixin, TimestampsMixin, SerializeMixin
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
@@ -17,49 +18,13 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 load_dotenv()
 
 DB_URL = os.environ['DB_URL']
-engine = create_engine(DB_URL, convert_unicode=True, echo=True)
-Session = sessionmaker(autocommit=False,
-                       autoflush=False,
-                       expire_on_commit=False,
-                       bind=engine)
 
-Session = scoped_session(Session)
+Base = declarative_base()
 
 
-class BaseMixin(object):
-    query = Session.query_property()
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    def to_dict(self):
-        d = {}
-        for column in self.__table__.columns:
-            value = getattr(self, column.name)
-            if value is not None:
-                d[column.name] = value
-
-        return d
-
-
-Base = declarative_base(bind=engine, cls=BaseMixin)
-
-current_session = scoped_session(Session)
-
-
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    session = Session()
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+class BaseModel(Base, ActiveRecordMixin, ReprMixin, TimestampsMixin, SerializeMixin):
+    __abstract__ = True
+    __repr__ = ReprMixin.__repr__
 
 
 class Ikeaitem(Base):
@@ -82,7 +47,7 @@ class Ikeaitem(Base):
     correct = Column(Boolean, nullable=False)
 
 
-class IkeaProduct(Base):
+class IkeaProduct(BaseModel):
     __tablename__ = 'ikeaproduct'
 
     id = Column(Integer, primary_key=True)
@@ -153,3 +118,28 @@ class Tguser(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('tgusers_id_seq'::regclass)"))
     tel_id = Column(BigInteger, nullable=False, unique=True)
     mst = Column(Text, nullable=False)
+
+
+engine = create_engine(DB_URL, convert_unicode=True, echo=False)
+Session = scoped_session(sessionmaker(autocommit=False,
+                                      autoflush=False,
+                                      expire_on_commit=False,
+                                      bind=engine))
+
+# Base.metadata.create_all(engine)
+
+BaseModel.set_session(Session)
+
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()

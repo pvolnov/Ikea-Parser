@@ -20,6 +20,7 @@ from pyexcel import merge_all_to_a_book
 from sqlalchemy import or_, JSON, cast, String, literal
 from telebot import types
 from app.config import MessageStatus, PROJECT_DIR
+from app.db import IkeaProduct
 from app.logging_config import logger
 from app.utils import stringify
 
@@ -239,7 +240,6 @@ def update_google_sheets():
         }).execute()
 
 
-from app.db import current_session as s, IkeaProduct
 import pyexcel
 
 
@@ -318,7 +318,7 @@ def save_ikea_product_to_csv(country, filename):
             return ', '.join(value)
         return str(value)
 
-    products = s.query(IkeaProduct).filter(IkeaProduct.country == country, IkeaProduct.ru_data.isnot(None)).order_by(
+    products = IkeaProduct.query.filter(IkeaProduct.country == country, IkeaProduct.ru_data.isnot(None)).order_by(
         IkeaProduct.id.desc()).limit(1000).all()
     lines = []
     for row in products:
@@ -342,11 +342,11 @@ def save_ikea_product_to_csv(country, filename):
 
 
 def get_ua_items(ignore_codes=[], mode="UA"):
-    items = s.query(IkeaProduct).filter(IkeaProduct.country == mode, IkeaProduct.is_failed == False,
-                                        IkeaProduct.ru_data.isnot(None),
-                                        IkeaProduct.ua_data.isnot(None),
-                                        cast(IkeaProduct.ua_data, String) != cast(literal(None, JSON()), String),
-                                        or_(IkeaProduct.ua_data.isnot(None), IkeaProduct.pl_data.isnot(None))).all()
+    items = IkeaProduct.query.filter(IkeaProduct.country == mode, IkeaProduct.is_failed == False,
+                                     IkeaProduct.ru_data.isnot(None),
+                                     IkeaProduct.ua_data.isnot(None),
+                                     cast(IkeaProduct.ua_data, String) != cast(literal(None, JSON()), String),
+                                     or_(IkeaProduct.ua_data.isnot(None), IkeaProduct.pl_data.isnot(None))).all()
 
     for item in items:
         print(item.to_dict().keys())

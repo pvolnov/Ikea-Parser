@@ -1,14 +1,12 @@
-import re
 import time
 from enum import Enum
-from pprint import pprint
 from random import randint
 
 import requests
-from bs4 import BeautifulSoup
 from func_timeout import FunctionTimedOut
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
+from tqdm import tqdm
 
 from app.logging_config import logger
 from app.updaters.base_updater import RowsUpdater
@@ -23,10 +21,11 @@ class Language(Enum):
     RU = 'ru'
     UA = 'uk'
     PL = 'pl'
+    EN = 'en'
 
 
 class BaseTranslator:
-    def translate_to(self, texts, target_lang: Language):
+    def translate_to(self, texts, target_lang: Language = None, source_lang: Language = None):
         raise NotImplementedError
 
     @staticmethod
@@ -34,7 +33,7 @@ class BaseTranslator:
         return True
 
 
-class SeleniumTranslator(BaseTranslator):
+class SeleniumMTranslateTranslator(BaseTranslator):
     def __init__(self, driver=None):
         self.driver = driver or get_driver()
 
@@ -42,7 +41,7 @@ class SeleniumTranslator(BaseTranslator):
     def does_support_lang(target_lang: Language, source_lang: Language):
         return target_lang == Language.RU and source_lang == Language.PL
 
-    def translate_to(self, texts, target_lang=Language.RU):
+    def translate_to(self, texts, target_lang=Language.RU, source_lang=None):
         if target_lang != Language.RU:
             raise NotImplementedError
         items = {
@@ -62,6 +61,46 @@ class SeleniumTranslator(BaseTranslator):
         return self.driver.find_element_by_id("text_out").get_attribute("value")
 
     def __del__(self):
+        self.driver.close()
+
+
+class SeleniumPerevodTranslator(BaseTranslator):
+    lang_pairs = {
+        (Language.PL, Language.UA): 'https://perevod.i.ua/polsko-ukrainskiy/',
+        (Language.PL, Language.RU): 'https://perevod.i.ua/polsko-russkiy/',
+        (Language.UA, Language.RU): 'https://perevod.i.ua/ukrainsko-russkiy/',
+        (Language.RU, Language.EN): 'https://perevod.i.ua/russko-angliyskiy/',
+    }
+
+    def __init__(self, driver=None):
+        self.driver = driver or get_driver()
+        self.driver.implicitly_wait(1)
+
+        self.url = ''
+
+    @classmethod
+    def does_support_lang(cls, target_lang: Language, source_lang: Language):
+        return (source_lang, target_lang) in cls.lang_pairs
+
+    def translate_to(self, texts, target_lang=None, source_lang=None):
+        lang_pair = (source_lang, target_lang)
+        url = self.lang_pairs[lang_pair]
+        return [
+            self.translate(url, text)
+            for text in texts
+        ]
+
+    def translate(self, url, text, retries_count=0):
+        self.driver.get(url, )
+        time.sleep(0.2)
+        self.driver.find_element_by_id("first_textarea").clear()
+        self.driver.find_element_by_id("first_textarea").send_keys(text)
+        self.driver.find_element_by_name("commit").click()
+        while self.driver.find_element_by_id("second_textarea").get_attribute("value") == "":
+            time.sleep(0.2)
+        return self.driver.find_element_by_id("second_textarea").get_attribute("value")
+
+    def __del__(self):
         self.driver.quit()
 
 
@@ -75,7 +114,7 @@ class YandexApiTranslator(BaseTranslator):
             "Authorization": f"Api-Key {self.API_KEY}"
         }
 
-    def translate_to(self, texts: list, target_lang: Language):
+    def translate_to(self, texts: list, target_lang: Language = None, source_lang: Language = None):
         if not texts:
             return texts
 
@@ -94,9 +133,9 @@ class YandexApiTranslator(BaseTranslator):
 
 
 class TranslatorsLibTranslator(BaseTranslator):
-    def translate_to(self, texts, target_lang: Language):
+    def translate_to(self, texts, target_lang: Language = None, source_lang: Language = None):
         return [
-            self.translate_text(text, target_lang=target_lang)
+            self.translate_text(text, target_lang=target_lang, source_lang=source_lang)
             for text in texts
         ]
 
@@ -115,7 +154,7 @@ class TranslatorsLibTranslator(BaseTranslator):
         for i in range(3):
             for translator_func in translators:
                 try:
-                    print(colored(f'try translator: {translator_func.__name__}', 'yellow'))
+                    # print(colored(f'try translator: {translator_func.__name__}', 'yellow'))
                     return func_timeout.func_timeout(
                         15, translator_func, args=(text,),
                         kwargs={
@@ -124,11 +163,12 @@ class TranslatorsLibTranslator(BaseTranslator):
                         }
                     )
                 except FunctionTimedOut:
-                    print(colored(f'timed out', 'red'))
-                except:
-                    print(colored(f'failed', 'red'))
                     pass
-            time.sleep(i * randint(20, 30))
+                    # print(colored(f'timed out', 'red'))
+                except:
+                    # print(colored(f'failed', 'red'))
+                    pass
+            time.sleep((i + 1) * randint(20, 30))
         raise Exception('Translation failed')
 
 
@@ -136,19 +176,21 @@ class TranslatorAdapter:
     """This class is highly api to translate any texts"""
 
     translators = {
-        'translators': TranslatorsLibTranslator(),
-        'selenium': SeleniumTranslator(),
-        'yandex': YandexApiTranslator(),
+        'translators': TranslatorsLibTranslator,
+        'mtranslate': SeleniumMTranslateTranslator,
+        'perevol': SeleniumPerevodTranslator,
+        'yandex': YandexApiTranslator,
     }
     translators_order = [
-        'selenium',
-        'translators', 'selenium', 'yandex'
+        'perevol',
+        'mtranslate',
+        'translators'
     ]
 
     def __init__(self):
         pass
 
-    def translate_list_to(self, texts, *args, **kwargs):
+    def _translate_list_to(self, texts, *args, **kwargs):
         if not texts:
             return []
 
@@ -163,17 +205,18 @@ class TranslatorAdapter:
 
             return translated_dicts
 
-    def _translate_list_to(self, texts: list, target_lang: Language = None, source_lang: Language = None):
+    def translate_list_to(self, texts: list, target_lang: Language = None, source_lang: Language = None):
         assert isinstance(texts, list)
+        assert len(texts) > 0
         assert isinstance(texts[0], str)
         translated_texts = []
         for tr_name in self.translators_order:
-            translator = self.translators[tr_name]
-            if not translator.does_support_lang(target_lang=target_lang, source_lang=source_lang):
+            Translator = self.translators[tr_name]
+            if not Translator.does_support_lang(target_lang=target_lang, source_lang=source_lang):
                 continue
             try:
-                translated_texts = translator.translate_to(texts, target_lang=target_lang)
-                print(colored(f'used translator - {tr_name}', 'magenta'))
+                translated_texts = Translator().translate_to(texts, target_lang=target_lang, source_lang=source_lang)
+                logger.debug(f'used translator - %s', tr_name)
                 break
             except:
                 pass
@@ -182,13 +225,13 @@ class TranslatorAdapter:
         try:
             assert len(translated_texts) == len(texts), f'result: {translated_texts}, source: {texts}'
         except:
-            logger.exception('Translate texts size not equal')
+            logger.exception('Translate texts size not equal. target_lang %s, source_lang %s', target_lang, source_lang)
             raise
         if not translated_texts:
             raise Exception('Every translator failed')
         return translated_texts
 
-    def translate_dict_to(self, dict_texts: dict, target_lang: Language, source_lang: Language = None):
+    def translate_dict_to(self, dict_texts: dict, target_lang: Language = None, source_lang: Language = None):
         items = list(dict_texts.items())
         texts = [item[1] for item in items]
         if not dict_texts:
@@ -202,7 +245,7 @@ class TranslatorAdapter:
         }
 
     def translate(self, text, target_lang: Language, source_lang: Language = None):
-        return self.translate_list_to([text], target_lang=target_lang, source_lang=source_lang)
+        return self.translate_list_to([text], target_lang=target_lang, source_lang=source_lang)[0]
 
     def translate_dicts(self, dicts: list, *args, **kwargs):
         big_dict = {}
@@ -242,14 +285,13 @@ class TranslateUpdater(RowsUpdater):
                 IkeaProduct.ua_data.is_(None),
                 IkeaProduct.ru_data.is_(None),
             ),
-            # IkeaProduct.pl_data.isnot(None),
             # or_(
             #     IkeaProduct.ua_data.is_(None),
             #     IkeaProduct.ru_data.is_(None),
             # )
         )
 
-    def translate_row(self, data: dict, target_lang: Language, source_lang: Language = None):
+    def translate_row(self, data: dict):
         fields = ['Название_позиции', 'Описание', 'Поисковые_запросы']
 
         dict_to_translate = {
@@ -259,27 +301,19 @@ class TranslateUpdater(RowsUpdater):
         }
         return dict_to_translate
 
-    def handle_rows(self, rows: list):
-        ru_dicts = []
-        ua_dicts = []
-        for row in rows:
-            row_data = self.row_to_translate(row)
-            ru_dicts.append(row_data['ru_data'])
-            ua_dicts.append(row_data['ua_data'])
+    # def handle_rows(self, rows: list):
+    #     for
+    #
+    #     for row in rows:
+    #         row_data = self.row_to_translate(row)
+    #         translations[(row_data['source_lang'], row_data['target_lang'])].append(row_data['data'])
+    #
+    #     for lang_pair, translation_dicts in translations.items():
+    #         translated_dicts = self.translator.translate_dicts(translation_dicts, target_lang=lang_pair[1],
+    #                                                            source_lang=lang_pair[0])
+    #         assert len(translated_dicts) == len(translation_dicts) == len(rows)
 
-        _ru_dicts = self.translator.translate_dicts(ru_dicts, target_lang=Language.RU)
-        _ua_dicts = self.translator.translate_dicts(ua_dicts, target_lang=Language.UA)
-        assert len(rows) == len(ru_dicts) == len(ua_dicts) == len(_ru_dicts) == len(_ua_dicts)
-        for row, ru_data, ua_data in zip(rows, _ru_dicts, _ua_dicts):
-            yield {
-                **row.to_dict(),
-                'ru_data': {**get_dict(row.ru_data), **ru_data},
-                'ua_data': {**get_dict(row.ua_data), **ua_data},
-            }
-
-    def row_to_translate(self, row: IkeaProduct):
-        ru_data = {}
-        ua_data = {}
+    def handle_row(self, row: IkeaProduct):
         source = {}
         source_lang = Language.RU
         if row.pl_data:
@@ -289,28 +323,50 @@ class TranslateUpdater(RowsUpdater):
             source = row.ua_data
             source_lang = Language.UA
 
-        if not row.ru_data:
-            ru_data = self.translate_row(source, target_lang=Language.RU)
-        if not row.ua_data:
-            ua_data = self.translate_row(source, target_lang=Language.UA)
+        ru_data = {}
+        ua_data = {}
 
-        return {
-            'ru_data': ru_data,
-            'ua_data': ua_data,
-            'source_lang': source_lang
+        data = self.translate_row(source)
+        if not row.ru_data:
+            ru_data = self.translator.translate_dict_to(data, source_lang=source_lang,
+                                                        target_lang=Language.RU)
+        if not row.ua_data:
+            ua_data = self.translator.translate_dict_to(data, source_lang=source_lang,
+                                                        target_lang=Language.UA)
+        assert isinstance(ua_data, dict)
+        assert isinstance(ru_data, dict)
+
+        yield {
+            **row.to_dict(),
+            'ru_data': {**get_dict(row.ru_data), **ru_data},
+            'ua_data': {**get_dict(row.ua_data), **ua_data},
         }
 
 
 if __name__ == '__main__':
     # TranslateUpdater(limit=1).update()
+    # driver = get_driver()
+    # driver.get('https://www.google.com')
+    # driver.get('https://www.yandex.ru')
+    # driver.get('https://www.google.com')
+    # time.sleep(10)
     # exit(0)
-    while True:
-        try:
-            TranslateUpdater(limit=10).update()
-        except:
-            logger.exception('Error in translate updater loop')
+    for i in tqdm(TranslateUpdater(limit=10)):
+        pass
+    # while True:
+    #     try:
+    #         TranslateUpdater(limit=10).update()
+    #     except:
+    #         logger.exception('Error in translate updater loop')
     # translator = TranslatorAdapter()
     # print(translator.translate_dicts([
     #     {'hello': 'hello world', 'buy': 'Goodbye everyone'},
     #     {'world': 'the world is big and round', 'man': 'Man big and fat!'},
     # ], target_lang=Language.RU))
+    # t = TranslatorAdapter()
+    # s = SeleniumPerevodTranslator()
+    # # print(s.does_support_lang(target_lang=Language.EN, source_lang=Language.RU))
+    # print(t.translate_list_to(['Завтра отправляемся в дорогу', 'Он ушел не попрощавшись'],
+    #                           source_lang=Language.RU, target_lang=Language.EN))
+    # driver = get_driver()
+    # driver.driver.get('https://google.com')

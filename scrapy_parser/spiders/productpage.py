@@ -32,7 +32,12 @@ class ProductPageSpider(scrapy.Spider):
             s.expunge_all()
             return items
 
+    def __init__(self, *args, limit=10, **kwargs):
+        self.limit = limit
+        super().__init__(*args, **kwargs)
+
     def start_requests(self):
+        print('LIMIT', getattr(self, 'limit', 10))
         for row in self.get_urls(getattr(self, 'limit', 10)):
             yield scrapy.Request(row.url, cb_kwargs={'row': row})
 
