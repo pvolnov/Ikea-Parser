@@ -11,12 +11,12 @@ from app.logging_config import logger
 
 __driver = None
 
-from pyvirtualdisplay import Display
+# from pyvirtualdisplay import Display
 from urllib.parse import urlparse
 
 
-display = Display(visible=0, size=(800, 600))
-display.start()
+# display = Display(visible=0, size=(800, 600))
+# display.start()
 
 
 class Driver:
