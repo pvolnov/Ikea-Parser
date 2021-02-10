@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "17d3ca3fb83eb0bd0eeb07864f9b076259984814097ef1317884d565f778047b"
+            "sha256": "7aa683f99c04b0b64ac96a6f4628222ea240b4c80cac33b6126cf46dc18344d6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -149,11 +149,18 @@
         },
         "colorama": {
             "hashes": [
-                "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b",
-                "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"
+                "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff",
+                "sha256:e96da0d330793e2cb9485e9ddfd918d456036c7149416295932478192f4436a1"
             ],
             "index": "pypi",
-            "version": "==0.4.4"
+            "version": "==0.4.3"
+        },
+        "colored": {
+            "hashes": [
+                "sha256:056fac09d9e39b34296e7618897ed1b8c274f98423770c2980d829fd670955ed"
+            ],
+            "index": "pypi",
+            "version": "==1.4.2"
         },
         "constantly": {
             "hashes": [
@@ -213,6 +220,14 @@
             ],
             "index": "pypi",
             "version": "==1.4.0"
+        },
+        "easyprocess": {
+            "hashes": [
+                "sha256:fb948daac01f64c1e49750752711253614846c6fc7e5692a718a7408f2ffb984",
+                "sha256:fca26794d3ced044d0471bd4ed767d5c287391d8a1c5e9d106fc59478b732543"
+            ],
+            "index": "pypi",
+            "version": "==0.3"
         },
         "et-xmlfile": {
             "hashes": [
@@ -458,7 +473,6 @@
                 "sha256:fc37870d6716b137e80d19241d0e2cff7a7643b925dfa49b4c8ebd1295eb506e"
             ],
             "index": "pypi",
-            "markers": "platform_python_implementation == 'CPython'",
             "version": "==4.6.2"
         },
         "macholib": {
@@ -972,6 +986,14 @@
             "index": "pypi",
             "version": "==2020.1"
         },
+        "pyvirtualdisplay": {
+            "hashes": [
+                "sha256:3cdacd70970a74d163a2417d8581f43a56bb1ac8d31c71a1a6a4348969062d65",
+                "sha256:8f3a4913c54528090157c194188c29eabbd06dd2389d4f879bc6f2e7dbdb1484"
+            ],
+            "index": "pypi",
+            "version": "==2.0"
+        },
         "queuelib": {
             "hashes": [
                 "sha256:42b413295551bdc24ed9376c1a2cd7d0b1b0fa4746b77b27ca2b797a276a1a17",
@@ -1133,6 +1155,7 @@
                 "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b",
                 "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
             ],
+            "index": "pypi",
             "version": "==0.10.2"
         },
         "tqdm": {
