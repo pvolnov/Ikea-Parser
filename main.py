@@ -18,6 +18,8 @@ from app.logging_config import logger
 import func_timeout
 from multiprocessing import Process
 from scrapy import Spider
+
+from app.representers.tgbot import start_pooling
 from app.updaters.base_updater import RowsUpdater
 from app.updaters.translate_updater import TranslateUpdater
 from app.updaters.check_is_available_updater import CheckAvailableRowsUpdater
@@ -79,6 +81,7 @@ class SimpleInfiniteRunner:
 if __name__ == '__main__':
     limit = 10
     runner = SimpleInfiniteRunner()
+    runner.add(start_pooling)
     runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
     runner.add(run_spider(ProductPageSpider), sleep=30)
     runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)

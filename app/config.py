@@ -5,7 +5,7 @@ import os
 
 PROJECT_DIR = os.getcwd()
 
-if 'heroku' not in os.environ:
+if 'DYNO' not in os.environ:
     # PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
     PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
 
