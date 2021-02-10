@@ -9,8 +9,6 @@ if 'heroku' not in os.environ:
     # PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
     PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
 
-# import sys
-# sys.path.append(os.path.join(PROJECT_DIR, 'data'))
 
 # -----------------------------------------------
 # Telegram bot settings

@@ -4,58 +4,58 @@ import time
 from bs4 import BeautifulSoup
 from sqlalchemy import or_
 from sqlalchemy.orm import Query
+from tqdm import tqdm
 
+from app.logging_config import logger
+from app.modules.selenium import get_driver
 from app.updaters.base_updater import RowsUpdater
-from app.updaters.ikea_parser import get_driver
 from app.db import IkeaProduct
 
 
 class CheckAvailableRowsUpdater(RowsUpdater):
     @staticmethod
-    def check_avil(driver, urls):
+    def check_avil(driver, url):
         driver.delete_all_cookies()
-        driver.refresh()
+        # driver.refresh()
+        item = {}
+        code = re.findall(r"\d+", url)[-1].strip("0")
+        driver.get(url)
+        # time.sleep(1)
 
-        items = {}
+        soup = BeautifulSoup(driver.page_source, 'html5lib')
+        price = 0
+        if soup.find("div", {"data-product-price": True}):
+            price = soup.find("div", {"data-product-price": True})["data-product-price"]
+        item = {
+            "price": price,
+            "Личные_заметки": "",
+            "avilable": False
+        }
 
-        for url in urls:
-            code = re.findall(r"\d+", url)[-1].strip("0")
-            driver.get(url)
-            time.sleep(2)
+        for k in range(4):
+            try:
+                driver.find_element_by_class_name("range-revamp-btn--emphasised").click()
+                time.sleep(2.5)
+                soup = BeautifulSoup(driver.page_source, 'html5lib')
+                if soup.find("div", {"data-product-price": True}):
+                    item["price"] = soup.find("div", {"data-product-price": True})["data-product-price"]
 
-            soup = BeautifulSoup(driver.page_source, 'html5lib')
-            price = 0
-            if soup.find("div", {"data-product-price": True}):
-                price = soup.find("div", {"data-product-price": True})["data-product-price"]
-            items[code] = {
-                "price": price,
-                "Личные_заметки": "",
-                "avilable": False
-            }
+                if soup.find("h3", {"class": "range-revamp-popup__heading"}) and "Ой!" in soup.find("h3", {
+                    "class": "range-revamp-popup__heading"}).text:
 
-            for k in range(4):
-                try:
-                    driver.find_element_by_class_name("range-revamp-btn--emphasised").click()
-                    time.sleep(3)
-                    soup = BeautifulSoup(driver.page_source, 'html5lib')
-                    if soup.find("div", {"data-product-price": True}):
-                        items[code]["price"] = soup.find("div", {"data-product-price": True})["data-product-price"]
+                    item["avilable"] = False
+                    item["Личные_заметки"] = "Ошибка при добавлении в корзину"
+                else:
+                    item["avilable"] = True
 
-                    if soup.find("h3", {"class": "range-revamp-popup__heading"}) and "Ой!" in soup.find("h3", {
-                        "class": "range-revamp-popup__heading"}).text:
+                if "30373588" == str(code):
+                    driver.save_screenshot(f"30373588.png")
 
-                        items[code]["avilable"] = False
-                        items[code]["Личные_заметки"] = "Ошибка при добавлении в корзину"
-                    else:
-                        items[code]["avilable"] = True
-
-                    if "30373588" == str(code):
-                        driver.save_screenshot(f"30373588.png")
-
-                    break
-                except:
-                    time.sleep(0.5)
-        return items
+                break
+            except:
+                logger.warning('check available wait')
+                time.sleep(0.5)
+        return item
 
     model = IkeaProduct
     index_elements = ['url']
@@ -75,6 +75,8 @@ class CheckAvailableRowsUpdater(RowsUpdater):
 
     def before(self, *args, **kwargs):
         n_drivers = self.drivers_count
+        self.driver = get_driver()
+        self.driver.implicitly_wait(1)
 
         self.drivers = [
             get_driver()
@@ -82,38 +84,19 @@ class CheckAvailableRowsUpdater(RowsUpdater):
         ]
 
     def after(self):
-        # self.driver.quit()
-        for driver in self.drivers:
-            driver.quit()
+        self.driver.quit()
+        # for driver in self.drivers:
+        #     driver.quit()
 
-    def handle_rows(self, rows):
-        row_by_code = {
-            row.code: row
-            for row in rows
+    def handle_row(self, row):
+        item = self.check_avil(self.driver, row.url)
+        yield {
+            **row.to_dict(),
+            'is_available': item.get('avilable', None),
+            'data': {**(row.data or {}), 'price': item.get('price')}
         }
-        batch_size = len(rows) // len(self.drivers) + 1
-        urls = [row.url for row in rows]
-        urls_batches = [urls[x:batch_size+x] for x in range(0, len(rows), batch_size)]
-        from concurrent.futures import ThreadPoolExecutor
-
-        items = {}
-        with ThreadPoolExecutor(max_workers=len(self.drivers)) as executor:
-            threads = []
-            for driver, urls_butch in zip(self.drivers, urls_batches):
-                threads.append(executor.submit(self.check_avil, driver, urls_butch))
-
-            for thread in threads:
-                items.update(thread.result())
-
-        for code, item in items.items():
-            row = row_by_code[code]
-            yield {
-                **row.to_dict(),
-                'is_available': item.get('avilable', None),
-                'data': {**(row.data or {}), 'price': item.get('price')}
-            }
 
 
 if __name__ == '__main__':
-    while True:
-        CheckAvailableRowsUpdater(limit=40).update()
+    for i in tqdm(CheckAvailableRowsUpdater(limit=10)):
+        pass

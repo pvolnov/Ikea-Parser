@@ -10,7 +10,7 @@ import gspread
 import requests
 from oauth2client.service_account import ServiceAccountCredentials
 
-from app.models import Posts
+from app.models_peewee import Posts
 from app.logging_config import logger
 
 
@@ -18,7 +18,7 @@ scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/au
          "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
-    '../data/ikeaparses-google.json', scope)
+    '../../data/ikeaparses-google.json', scope)
 client = gspread.authorize(credentials)
 
 spreadsheet = client.open('Доставка_Ikea')

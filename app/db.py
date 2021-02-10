@@ -1,18 +1,11 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import ARRAY, BigInteger, Boolean, Column, Integer, JSON, Text, text, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 import datetime
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 import os
 from contextlib import contextmanager
 from sqlalchemy_mixins import ActiveRecordMixin, ReprMixin, TimestampsMixin, SerializeMixin
-
-import sqlalchemy as sa
-import sqlalchemy.orm as orm
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 load_dotenv()
@@ -125,8 +118,6 @@ Session = scoped_session(sessionmaker(autocommit=False,
                                       autoflush=False,
                                       expire_on_commit=False,
                                       bind=engine))
-
-# Base.metadata.create_all(engine)
 
 BaseModel.set_session(Session)
 

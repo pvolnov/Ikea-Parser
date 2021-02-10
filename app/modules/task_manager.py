@@ -4,10 +4,13 @@ from datetime import datetime, timedelta
 from time import sleep
 from app.logging_config import logger
 from hashlib import sha1
-import types
 
 
 class Task:
+    """
+    Класс представляет собой задачу, которая задается функцией, настройками периодичности запуска,
+    количества повторений, отложенного начала и тд
+    """
     def __init__(self, name: str, func, args=None, kwargs=None, single=None,
                  interval: timedelta = None, start: datetime = None,
                  runs_count: int = None):
@@ -74,6 +77,12 @@ class Task:
 
 
 class TaskManager:
+    """
+    Класс управляет задачами Task.
+    То есть запускает их в необходимое время
+    Имеет интерфейс для взаимодействия с существующими задачами и добавления новых
+    Сохраняет свое состояние в файл default_config_filename = 'tasks.json'
+    """
     default_config_filename = 'tasks.json'
 
     def __init__(self, config_filename=None, update_interval: float = 1):

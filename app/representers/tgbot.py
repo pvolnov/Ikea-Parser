@@ -4,7 +4,7 @@ from app.logging_config import logger
 from app.representers.represent_data_utils import *
 from app.config import TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_PASS, MessageStatus
 
-from app.models import IkeaItems, Tasks, TgUsers
+from app.models_peewee import IkeaItems, Tasks, TgUsers
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 

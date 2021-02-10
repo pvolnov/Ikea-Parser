@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Query
 
 from app.db import session_scope, IkeaProduct, Session
-
 from app.logging_config import logger
 from scrapy_parser.pipelines import DBUpdaterPipeline
 
@@ -30,14 +29,11 @@ class RowsUpdater:
 
     def make_query(self):
         q = self.query
-        # s.execute(rows)
         self.session.expunge_all()
-        # rows_count = query.count()
-        # all_rows_count = self.session.query(self.model).count()
         if self.limit:
             q = q.limit(self.limit)
-        # print(colored(f'Lines left: {rows_count} from {all_rows_count}', 'green'))
         self.rows = q.all()
+        print('FOUND ROWS', len(self.rows))
 
     def all_count(self, session):
         return session.query(self.model).count()
@@ -50,12 +46,20 @@ class RowsUpdater:
         logger.debug('Handle item %s', item)
         self.pipeline.process_item(item)
 
+    def handle_row(self, row):
+        raise NotImplementedError
+
     def __len__(self):
         return self.remaining_count()
 
     def __next__(self):
-        for item in self.handle_row(self._get_row()):
-            self.handle_item(item)
+        try:
+            for item in self.handle_row(self._get_row()):
+                self.handle_item(item)
+        except StopIteration:
+            raise
+        except:
+            logger.exception('Fail to handle row')
 
     def _update_session(self):
         if self.session:
@@ -67,7 +71,6 @@ class RowsUpdater:
 
     def _begin_bunch(self):
         self._update_session()
-        self.before()
         if hasattr(self.pipeline, 'open_spider'):
             self.pipeline.open_spider()
         self.before()
@@ -75,10 +78,12 @@ class RowsUpdater:
         self.__curr_row_index = 0
 
     def _get_row(self):
-        self.__curr_row_index += 1
-        if self.__curr_row_index > self.limit:
+        if not self.rows or self.__curr_row_index >= len(self.rows):
             self._end_bunch()
             self._begin_bunch()
+        if not self.rows:
+            raise StopIteration
+        self.__curr_row_index += 1
         return self.rows[self.__curr_row_index - 1]
 
     def _end_bunch(self):
@@ -90,7 +95,7 @@ class RowsUpdater:
         self._begin_bunch()
         return self
 
-    def update(self):
+    def update(self, *args, **kwargs):
         self._begin_bunch()
         if hasattr(self, 'handle_rows'):
             for item in self.handle_rows(self.rows):

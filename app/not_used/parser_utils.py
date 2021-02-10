@@ -1,13 +1,3 @@
-import re
-import time
-import requests
-from bs4 import BeautifulSoup
-from tqdm import tqdm
-
-from app.models import UaIkeaItems
-from app.logging_config import logger
-
-
 class ParserUtils:
     """
     Файл с различным утилитами для парсинга икеи
