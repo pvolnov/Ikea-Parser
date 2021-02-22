@@ -1,6 +1,6 @@
 from selenium import webdriver
 
-from app.config import PROJECT_DIR
+from app.config import PROJECT_DIR, HEROKU
 from app.logging_config import logger
 
 __driver = None
@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 class Driver:
     def __init__(self):
         self.max_tabs_count = 5
-        chrome_options = webdriver.ChromeOptions()
+        # chrome_options = webdriver.ChromeOptions()
         prefs = {'profile.default_content_setting_values': {'cookies': 2, 'images': 2, 'javascript': 2,
                                                             'plugins': 2, 'popups': 2, 'geolocation': 2,
                                                             'css': 2,
@@ -35,12 +35,15 @@ class Driver:
         # chrome_options.add_argument("start-maximized")
         # chrome_options.add_argument("disable-infobars")
         # chrome_options.add_argument("--disable-extensions")
-        prefs = {"profile.managed_default_content_settings.images": 2}
-        chrome_options.add_experimental_option('prefs', prefs)
+        # prefs = {"profile.managed_default_content_settings.images": 2}
+        # chrome_options.add_experimental_option('prefs', prefs)
         # chrome_options.add_argument(f"load-extension={PROJECT_DIR}/data/gighmmpiobklfepjocnamgkkbiglidom.zip")
         # self.driver = webdriver.Chrome(chrome_options=chrome_options,
         #                                executable_path=f'{PROJECT_DIR}/data/chromedriver')
-        self.driver = webdriver.Firefox(executable_path=f'{PROJECT_DIR}/data/geckodriver')
+        if HEROKU:
+            self.driver = webdriver.PhantomJS()
+        else:
+            self.driver = webdriver.Firefox(executable_path=f'{PROJECT_DIR}/data/geckodriver')
         self.tabs_dict = {
 
         }
@@ -49,7 +52,8 @@ class Driver:
         return getattr(self.driver, item)
 
     def close(self):
-        display.stop()
+        pass
+        # display.stop()
 
     def _new_tab(self):
         if len(self.driver.window_handles) < self.max_tabs_count:
