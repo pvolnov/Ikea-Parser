@@ -27,80 +27,79 @@ def start(message):
         bot.send_message(message.chat.id, mes)
 
 
-# @bot.message_handler(content_types=['document'])
-# def new_doc(message):
-#     # save file
-#     user = TgUsers.get_or_none(TgUsers.tel_id == message.chat.id)
-#     if user is None:
-#         bot.send_message(message.chat.id, "Пройдите авторизацию")
-#         return
-#     file_info = bot.get_file(message.document.file_id)
-#     downloaded_file = bot.download_file(file_info.file_path)
-#     with open("../.tmp/file.xlsx", "wb") as f:
-#         f.write(downloaded_file)
-#     doc = pd.read_excel('file.xlsx').fillna("").to_dict('records')
-#     bot.reply_to(message, f"Загружен файл ({len(doc)} строк)")
-#
-#     if user.mst == MessageStatus.DIFFERENCE:
-#         codes = []
-#         for d in doc:
-#             if d['Производитель'] == "IKEA":
-#                 codes.append(d['Код_товара'].replace(".", "").strip("0"))
-#         get_ua_items(set(codes))
-#         with open("output.xlsx", "rb") as f:
-#             bot.send_document(message.chat.id, f, caption="Остаточные данные с ikea.ua")
-#
-#     if user.mst == MessageStatus.LOAD_FROM_IKEA_1:
-#         avilable_code = IkeaItems.select(IkeaItems.code).execute()
-#         avilable_code = set([i.code for i in avilable_code])
-#         print("New doc")
-#
-#         for d in doc:
-#             if d['Производитель'] == "IKEA":
-#                 code = d['Код_товара'].replace(".", "").strip("0")
-#                 if int(code) not in avilable_code:
-#                     d['Наличие'] = "-"
-#
-#         df = pd.DataFrame.from_dict(doc)
-#         df["Идентификатор_товара"] = df["Код_товара"].apply(lambda x: x.replace(".", "").strip("0"))
-#         df["Валюта"] = "UAH"
-#         df.to_excel("res.xlsx", index=False)
-#         print("Файл подготовлен")
-#         with open("res.xlsx", "rb") as f:
-#             bot.send_document(message.chat.id, f, caption="Данные с заполненной колонкой наличия")
-#
-#     elif user.mst in [MessageStatus.UPDATE_UA, MessageStatus.UPDATE_PL]:
-#         mode = "PL" if user.mst == MessageStatus.UPDATE_PL else "UA"
-#         print("Updating with mode: %s" % mode)
-#         bot.send_message(message.chat.id, f"В файле {len(doc)} товаров")
-#         if mode == "UA":
-#             items = UaIkeaItems.select().execute()
-#             PRICES_TABLE = PRICES
-#         else:
-#             items = PlIkeaItems.select().execute()
-#             PRICES_TABLE = PRICES_PL
-#
-#         items = {i.code: {
-#             "price": float(str(i.data["Цена"]).replace(" ", "")),
-#             "avilable": i.avilable,
-#         } for i in items}
-#
-#         for dat in tqdm(doc):
-#             code = re.sub(r"\D+", "", dat['Код_товара']).strip("0")
-#             if code in items:
-#                 dat['Наличие'] = "+" if items[code]["avilable"] else "-"
-#
-#                 for p in PRICES_TABLE:
-#                     if p > items[code]["price"]:
-#                         dat['Цена'] = int(items[code]["price"] * PRICES_TABLE[p])
-#                         break
-#             else:
-#                 dat['Наличие'] = "-"
-#                 dat['Цена'] = 0
-#
-#         pd.DataFrame.from_dict(doc).to_excel("res.xlsx", index=False)
-#         with open("res.xlsx", "rb") as f:
-#             bot.send_document(message.chat.id, f, caption="Данные с ikea.ua с заполненной колонкой наличия")
+@bot.message_handler(content_types=['document'])
+def new_doc(message):
+    # save file
+    user = TgUsers.get_or_none(TgUsers.tel_id == message.chat.id)
+    if user is None:
+        bot.send_message(message.chat.id, "Пройдите авторизацию")
+        return
+    file_info = bot.get_file(message.document.file_id)
+    print(file_info)
+    downloaded_file = bot.download_file(file_info.file_path)
+    filename = f"{PROJECT_DIR}/.tmp/file.xlsx"
+    with open(filename, "wb") as f:
+        f.write(downloaded_file)
+    doc = pd.read_excel(filename).fillna("").to_dict('records')
+    bot.reply_to(message, f"Загружен файл ({len(doc)} строк)")
+
+    if user.mst == MessageStatus.FILL_DOC_FIELDS:
+        bot.send_message(message.chat.id, 'Подождите, обработка файла...')
+        update_document(filename)
+        with open(filename, "rb") as f:
+            bot.send_document(message.chat.id, f, caption="Обновленный файл с ikea.ua")
+
+    if user.mst == MessageStatus.LOAD_FROM_IKEA_1:
+        avilable_code = IkeaItems.select(IkeaItems.code).execute()
+        avilable_code = set([i.code for i in avilable_code])
+        print("New doc")
+
+        for d in doc:
+            if d['Производитель'] == "IKEA":
+                code = d['Код_товара'].replace(".", "").strip("0")
+                if int(code) not in avilable_code:
+                    d['Наличие'] = "-"
+
+        df = pd.DataFrame.from_dict(doc)
+        df["Идентификатор_товара"] = df["Код_товара"].apply(lambda x: x.replace(".", "").strip("0"))
+        df["Валюта"] = "UAH"
+        df.to_excel("res.xlsx", index=False)
+        print("Файл подготовлен")
+        with open("res.xlsx", "rb") as f:
+            bot.send_document(message.chat.id, f, caption="Данные с заполненной колонкой наличия")
+
+    elif user.mst in [MessageStatus.UPDATE_UA, MessageStatus.UPDATE_PL]:
+        mode = "PL" if user.mst == MessageStatus.UPDATE_PL else "UA"
+        print("Updating with mode: %s" % mode)
+        bot.send_message(message.chat.id, f"В файле {len(doc)} товаров")
+        if mode == "UA":
+            items = UaIkeaItems.select().execute()
+            PRICES_TABLE = PRICES
+        else:
+            items = PlIkeaItems.select().execute()
+            PRICES_TABLE = PRICES_PL
+
+        items = {i.code: {
+            "price": float(str(i.data["Цена"]).replace(" ", "")),
+            "avilable": i.avilable,
+        } for i in items}
+
+        for dat in tqdm(doc):
+            code = re.sub(r"\D+", "", dat['Код_товара']).strip("0")
+            if code in items:
+                dat['Наличие'] = "+" if items[code]["avilable"] else "-"
+
+                for p in PRICES_TABLE:
+                    if p > items[code]["price"]:
+                        dat['Цена'] = int(items[code]["price"] * PRICES_TABLE[p])
+                        break
+            else:
+                dat['Наличие'] = "-"
+                dat['Цена'] = 0
+
+        pd.DataFrame.from_dict(doc).to_excel("res.xlsx", index=False)
+        with open("res.xlsx", "rb") as f:
+            bot.send_document(message.chat.id, f, caption="Данные с ikea.ua с заполненной колонкой наличия")
 
 
 @bot.message_handler(content_types=["text"])
@@ -129,9 +128,9 @@ def text_mes(message):
         update_google_sheets()
         bot.send_message(u.tel_id, "Таблица обновлена")
 
-    elif message.text == MessageStatus.DIFFERENCE:
-        u.mst = MessageStatus.DIFFERENCE
-        bot.send_message(u.tel_id, "Пришлите файл для которого нужно уточнить разницу")
+    elif message.text == MessageStatus.FILL_DOC_FIELDS:
+        u.mst = MessageStatus.FILL_DOC_FIELDS
+        bot.send_message(u.tel_id, "Пришлите файл где нужно обновить поля цены и наличия")
 
     elif message.text in [MessageStatus.DATA_FROM_IKEA_UA, MessageStatus.DATA_FROM_IKEA_PL]:
         filename = PROJECT_DIR + '/data/output.xlsx'

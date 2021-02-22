@@ -7,7 +7,7 @@ PROJECT_DIR = os.getcwd()
 
 if 'DYNO' not in os.environ:
     # PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
-    PROJECT_DIR = re.search(r'(.*Ikea-Parser)', os.getcwd()).group(1)
+    PROJECT_DIR = re.search(r'(.*ikea-parser)', os.getcwd()).group(1)
 
 
 # -----------------------------------------------
@@ -25,7 +25,7 @@ class MessageStatus:
     LOAD_FROM_IKEA_5 = "DomComfort"
     UPDATE_GOOGLE_SHEETS = "Update google table Ⓖ"
     UPDATE_GOOGLE_TREKING = "Treking update 🧳"
-    DIFFERENCE = "Difference 📏"
+    FILL_DOC_FIELDS = "Заполнить Наличие и Цену в файле"
     UPDATE_UA = "Наличие в ikea.ua 🗳"
     UPDATE_PL = "Наличие в ikea.pl 🗳"
     DATA_FROM_IKEA_UA = "Слепок всей ikea.ua"

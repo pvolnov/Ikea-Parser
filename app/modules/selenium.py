@@ -1,12 +1,6 @@
-import re
-import time
-import requests
-from bs4 import BeautifulSoup
 from selenium import webdriver
-from tqdm import tqdm
 
 from app.config import PROJECT_DIR
-from app.models_peewee import UaIkeaItems
 from app.logging_config import logger
 
 __driver = None

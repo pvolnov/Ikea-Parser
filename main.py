@@ -12,7 +12,7 @@ from time import sleep
 from func_timeout import FunctionTimedOut
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 from app.logging_config import logger
 import func_timeout
@@ -47,10 +47,12 @@ def run_spider(spider: type(Spider)):
     return run
 
 
-def run_updater(updater: RowsUpdater, *args, sleep_sec=2, **kwargs):
-    for i in tqdm(updater):
-        updater.update(*args, **kwargs)
-        sleep(sleep_sec)
+def run_updater(updater: RowsUpdater):
+    def run(*args, **kwargs):
+        for i in trange(updater.limit + 1):
+            updater.update(*args, **kwargs)
+
+    return run
 
 
 class SimpleInfiniteRunner:
@@ -81,9 +83,9 @@ class SimpleInfiniteRunner:
 if __name__ == '__main__':
     limit = 10
     runner = SimpleInfiniteRunner()
-    runner.add(start_pooling)
-    # runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
-    # runner.add(run_spider(ProductPageSpider), sleep=30)
-    # runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)
-    # runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
+    # runner.add(start_pooling)
+    runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
+    runner.add(run_spider(ProductPageSpider), sleep=30)
+    runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)
+    runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
     runner.start()

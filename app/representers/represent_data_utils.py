@@ -11,6 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.policy import SMTPUTF8
 
+import openpyxl
 import pandas as pd
 import requests
 from google.auth.transport.requests import Request
@@ -20,9 +21,10 @@ from pyexcel import merge_all_to_a_book
 from sqlalchemy import or_, JSON, cast, String, literal
 from telebot import types
 from app.config import MessageStatus, PROJECT_DIR
-from app.db import IkeaProduct
+from app.db import IkeaProduct, session_scope
 from app.logging_config import logger
 from app.utils import stringify
+import typing as t
 
 PRICES = {
     10: 1.5,
@@ -73,7 +75,9 @@ parsels_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
 
 parsels_keyboard.add(
     types.KeyboardButton(text=MessageStatus.DATA_FROM_IKEA_PL),
-    types.KeyboardButton(text=MessageStatus.DATA_FROM_IKEA_UA))
+    types.KeyboardButton(text=MessageStatus.DATA_FROM_IKEA_UA),
+    types.KeyboardButton(text=MessageStatus.FILL_DOC_FIELDS)
+)
 
 
 def get_url_cost(code: str):
@@ -119,6 +123,8 @@ def get_data(row):
 
 
 def update_delivery():
+    """TODO разобраться и наладить
+    Пока не поддерживается"""
     import gspread
     import requests
     from oauth2client.service_account import ServiceAccountCredentials
@@ -341,6 +347,64 @@ def save_ikea_product_to_csv(country, filename):
     save_xlsx(lines, filename)
 
 
+def update_document(xlsx_filepath: str):
+    """
+    Принимает путь до документа в определенном формате
+    Пример файла https://drive.google.com/file/d/1Xtj5JeSyL7MJY9QRrlvBezfA_3PJJaD1/view?usp=sharing
+    Функция обновляет колонки Цена и Наличие
+    последними данными из бд и перезаписывает файл по тому же пути
+    Используются поля таблички
+    IkeaProduct: code, country, is_available, data
+    """
+    assert xlsx_filepath.endswith('.xlsx')
+
+    # Open xlsx file
+    workbook = openpyxl.load_workbook(xlsx_filepath)
+    products_sheet = workbook['Export Products Sheet']
+    first_row = products_sheet[1]
+    column_names = {
+        cell.value: i for i, cell in enumerate(first_row)
+    }
+    # Collect ikea product codes
+    codes = {}
+    for i, row in enumerate(products_sheet.iter_rows()):
+        producer_cell = row[column_names['Производитель']]
+        code_cell = row[column_names['Код_товара']]
+        if producer_cell.value == 'IKEA':
+            code = code_cell.value.replace('.', '')
+            codes[code] = i
+
+    # Request to DB
+    with session_scope() as session:
+        query = session.query(IkeaProduct.data, IkeaProduct.code, IkeaProduct.is_available).filter(
+            IkeaProduct.code.in_(codes.keys()),
+            IkeaProduct.country == 'UA'
+        )
+        products: t.List[IkeaProduct] = query.all()
+
+        def set_cell_value(code, col_name, value):
+            products_sheet.cell(column=column_names[col_name] + 1,
+                                row=codes[code] + 1).value = value
+
+        print('Products collected', len(products))
+        print('Codes collected', len(codes))
+        for product in products:
+            set_cell_value(product.code, 'Наличие', '+' if product.is_available else '-')
+            price = float(str(product.data.get('price', '0')).replace(',', '.'))
+            if not price:
+                continue
+            for p in PRICES:
+                if p > price:
+                    price *= PRICES[p]
+                    break
+            set_cell_value(product.code, 'Цена', price)
+    workbook.save(xlsx_filepath)
+
+
+if __name__ == '__main__':
+    update_document('you_can_delete_this.xlsx')
+
+
 def get_ua_items(ignore_codes=[], mode="UA"):
     items = IkeaProduct.query.filter(IkeaProduct.country == mode, IkeaProduct.is_failed == False,
                                      IkeaProduct.ru_data.isnot(None),
@@ -393,8 +457,8 @@ def get_ua_items(ignore_codes=[], mode="UA"):
 
             def preparing(cod):
                 cod = str(cod)
-                while len(cod) < 8:
-                    cod = "0" + cod
+                # while len(cod) < 8:
+                #     cod = "0" + cod
                 return f"{cod[:3]}.{cod[3:6]}.{cod[6:]}"
 
             if item["Код_товара"] in SEARCH_TEXT:
