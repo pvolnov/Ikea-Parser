@@ -81,7 +81,7 @@ class SimpleInfiniteRunner:
 
 
 if __name__ == '__main__':
-    limit = 10
+    limit = 3
     runner = SimpleInfiniteRunner()
     runner.add(start_pooling)
     runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)

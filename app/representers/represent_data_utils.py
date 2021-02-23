@@ -390,7 +390,8 @@ def update_document(xlsx_filepath: str):
         print('Codes collected', len(codes))
         for product in products:
             set_cell_value(product.code, 'Наличие', '+' if product.is_available else '-')
-            price = float(str(product.data.get('price', '0')).replace(',', '.'))
+            data = product.data or {}
+            price = float(str(data.get('price', '0') or '0').replace(',', '.'))
             if not price:
                 continue
             for p in PRICES:

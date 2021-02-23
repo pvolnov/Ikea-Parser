@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 class Driver:
     def __init__(self):
         self.max_tabs_count = 5
-        # chrome_options = webdriver.ChromeOptions()
+        chrome_options = webdriver.ChromeOptions()
         prefs = {'profile.default_content_setting_values': {'cookies': 2, 'images': 2, 'javascript': 2,
                                                             'plugins': 2, 'popups': 2, 'geolocation': 2,
                                                             'css': 2,
@@ -32,18 +32,22 @@ class Driver:
                                                             'protected_media_identifier': 2, 'app_banner': 2,
                                                             'site_engagement': 2,
                                                             'durable_storage': 2}}
-        # chrome_options.add_argument("start-maximized")
-        # chrome_options.add_argument("disable-infobars")
-        # chrome_options.add_argument("--disable-extensions")
-        # prefs = {"profile.managed_default_content_settings.images": 2}
-        # chrome_options.add_experimental_option('prefs', prefs)
+        chrome_options.add_argument("start-maximized")
+        chrome_options.add_argument("disable-infobars")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument('--headless')
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        chrome_options.add_experimental_option('prefs', prefs)
         # chrome_options.add_argument(f"load-extension={PROJECT_DIR}/data/gighmmpiobklfepjocnamgkkbiglidom.zip")
-        # self.driver = webdriver.Chrome(chrome_options=chrome_options,
-        #                                executable_path=f'{PROJECT_DIR}/data/chromedriver')
-        if HEROKU:
-            self.driver = webdriver.PhantomJS()
-        else:
-            self.driver = webdriver.Firefox(executable_path=f'{PROJECT_DIR}/data/geckodriver')
+        self.driver = webdriver.Chrome(chrome_options=chrome_options,
+                                       executable_path=f'{PROJECT_DIR}/data/chromedriver')
+        # if HEROKU:
+        # self.driver = webdriver.PhantomJS()
+        # # else:
+        # from selenium.webdriver.firefox.options import Options
+        # options = Options()
+        # # options.headless = True
+        # self.driver = webdriver.Firefox(executable_path=f'{PROJECT_DIR}/data/geckodriver', options=options)
         self.tabs_dict = {
 
         }

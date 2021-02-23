@@ -93,7 +93,7 @@ class SeleniumPerevodTranslator(BaseTranslator):
 
     def translate(self, url, text):
         text = text[:1000]
-        self.driver.get(url, )
+        self.driver.get(url)
         time.sleep(0.2)
         self.driver.find_element_by_id("first_textarea").clear()
         self.driver.find_element_by_id("first_textarea").send_keys(text)
@@ -142,7 +142,7 @@ class TranslatorsLibTranslator(BaseTranslator):
         ]
 
     @staticmethod
-    def translate_text(text, target_lang: Language):
+    def translate_text(text, target_lang: Language, source_lang: Language = None):
         import translators as ts
         translators = [
             ts.google,
