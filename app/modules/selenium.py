@@ -1,6 +1,8 @@
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from app.config import PROJECT_DIR, HEROKU
+
+from app.config import PROJECT_DIR, PRODUCTION
 from app.logging_config import logger
 
 __driver = None
@@ -38,9 +40,19 @@ class Driver:
         chrome_options.add_argument('--headless')
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option('prefs', prefs)
+        capabilities = {
+            "browserName": "chrome",
+            "version": "78.0",
+            "platform": "LINUX"
+        }
+        driver = webdriver.Remote(
+            command_executor='http://127.0.0.1:4444/wd/hub',
+            desired_capabilities=DesiredCapabilities.CHROME,
+            # options=chrome_options
+        )
         # chrome_options.add_argument(f"load-extension={PROJECT_DIR}/data/gighmmpiobklfepjocnamgkkbiglidom.zip")
-        self.driver = webdriver.Chrome(chrome_options=chrome_options,
-                                       executable_path=f'{PROJECT_DIR}/data/chromedriver')
+        # self.driver = webdriver.Chrome(chrome_options=chrome_options,
+        #                                executable_path=f'{PROJECT_DIR}/data/chromedriver')
         # if HEROKU:
         # self.driver = webdriver.PhantomJS()
         # # else:
@@ -48,6 +60,7 @@ class Driver:
         # options = Options()
         # # options.headless = True
         # self.driver = webdriver.Firefox(executable_path=f'{PROJECT_DIR}/data/geckodriver', options=options)
+        self.driver = driver
         self.tabs_dict = {
 
         }

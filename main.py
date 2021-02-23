@@ -58,6 +58,7 @@ def run_updater(updater: RowsUpdater):
 class SimpleInfiniteRunner:
     def __init__(self):
         self.tasks = []
+        self.threads = []
 
     def add(self, func, *args, **kwargs):
         self.tasks.append((func, args, kwargs))
@@ -77,7 +78,12 @@ class SimpleInfiniteRunner:
     def start(self):
         with ThreadPoolExecutor() as executor:
             for (func, args, kwargs) in self.tasks:
-                executor.submit(self.__infinite_wrapper, func, *args, **kwargs)
+                thread = executor.submit(self.__infinite_wrapper, func, *args, **kwargs)
+                self.threads.append(thread)
+
+    def stop(self):
+        for thread in self.threads:
+            thread.cancel()
 
 
 if __name__ == '__main__':
@@ -86,6 +92,7 @@ if __name__ == '__main__':
     runner.add(start_pooling)
     # runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
     # runner.add(run_spider(ProductPageSpider), sleep=30)
-    runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)
+    # runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)
     # runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
     runner.start()
+

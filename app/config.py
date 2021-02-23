@@ -5,13 +5,7 @@ import os
 
 PROJECT_DIR = os.getcwd()
 
-HEROKU = False
-
-if 'DYNO' not in os.environ:
-    # PROJECT_DIR = '/home/boris/LocalProjects/Ikea-Parser'
-    PROJECT_DIR = re.search(r'(.*ikea-parser)', os.getcwd()).group(1)
-    HEROKU = True
-
+PRODUCTION = True
 
 # -----------------------------------------------
 # Telegram bot settings
