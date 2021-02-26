@@ -1,0 +1,4 @@
+services:
+  parser:
+    build: .
+    restart: always

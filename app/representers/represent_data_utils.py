@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import json
 import os.path
 import os.path as op
@@ -117,8 +115,6 @@ def get_data(row):
             for key, value in ru_data.items()
         }
     )
-    print('data keys', data.keys())
-    print('ua items', row.ua_data.keys())
     return data
 
 
@@ -182,6 +178,7 @@ def update_delivery():
     return len(doc)
 
 
+# not used - old code
 def update_google_sheets():
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
@@ -342,7 +339,7 @@ def save_ikea_product_to_csv(country, filename):
             }
             lines.append(line)
         except:
-            print(row)
+            logger.warning("Fail save row to file %s", row)
 
     save_xlsx(lines, filename)
 
@@ -368,11 +365,13 @@ def update_document(xlsx_filepath: str):
     # Collect ikea product codes
     codes = {}
     for i, row in enumerate(products_sheet.iter_rows()):
-        producer_cell = row[column_names['Производитель']]
-        code_cell = row[column_names['Код_товара']]
-        if producer_cell.value == 'IKEA':
+        try:
+            code_cell = row[column_names['Код_товара']]
             code = code_cell.value.replace('.', '')
             codes[code] = i
+        except:
+            logger.warning("Can't parse row")
+            pass
 
     # Request to DB
     with session_scope() as session:
@@ -386,19 +385,21 @@ def update_document(xlsx_filepath: str):
             products_sheet.cell(column=column_names[col_name] + 1,
                                 row=codes[code] + 1).value = value
 
-        print('Products collected', len(products))
-        print('Codes collected', len(codes))
         for product in products:
-            set_cell_value(product.code, 'Наличие', '+' if product.is_available else '-')
-            data = product.data or {}
-            price = float(str(data.get('price', '0') or '0').replace(',', '.'))
-            if not price:
-                continue
-            for p in PRICES:
-                if p > price:
-                    price *= PRICES[p]
-                    break
-            set_cell_value(product.code, 'Цена', price)
+            try:
+                set_cell_value(product.code, 'Наличие', '+' if product.is_available else '-')
+                data = product.data or {}
+                price = float(str(data.get('price', '0') or '0').replace(',', '.'))
+                if not price:
+                    continue
+                for p in PRICES:
+                    if p > price:
+                        price *= PRICES[p]
+                        break
+                set_cell_value(product.code, 'Цена', price)
+            except:
+                logger.warning("Fail to update row in table")
+    logger.info('Table saved')
     workbook.save(xlsx_filepath)
 
 
@@ -413,8 +414,6 @@ def get_ua_items(ignore_codes=[], mode="UA"):
                                      cast(IkeaProduct.ua_data, String) != cast(literal(None, JSON()), String),
                                      or_(IkeaProduct.ua_data.isnot(None), IkeaProduct.pl_data.isnot(None))).all()
 
-    for item in items:
-        print(item.to_dict().keys())
     groups, groups_lists = get_groups(items)
     df1 = pd.DataFrame.from_dict(groups)
 
@@ -454,7 +453,6 @@ def get_ua_items(ignore_codes=[], mode="UA"):
                     if p > pr:
                         item['Цена'] = pr * val
                         break
-                print(item['Цена'], pr)
 
             def preparing(cod):
                 cod = str(cod)
@@ -485,7 +483,7 @@ def get_ua_items(ignore_codes=[], mode="UA"):
     products_sheet = f'{PROJECT_DIR}/data/Export Products Sheet.csv'
     groups_sheet = f'{PROJECT_DIR}/data/Export Groups Sheet.csv'
     output = f'{PROJECT_DIR}/data/output.xlsx'
-    df1.to_csv(products_sheet, index=False)
+    df1.to_csv(groups_sheet, index=False)
     pd.DataFrame.from_dict(result).to_csv(products_sheet, index=False)
 
     merge_all_to_a_book([products_sheet, groups_sheet], output)

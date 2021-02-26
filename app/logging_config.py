@@ -25,7 +25,7 @@ class TelegramLogsHandler(logging.Handler):
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(handler)
