@@ -30,3 +30,9 @@ python main.py
 ```
 ./heroku_upload
 ```
+
+Перед запуском необходимо убедиться, что [запущен](https://4te.me/post/selenium-docker/) селеноид
+```shell
+curl http://localhost:4444/status
+```
+Эта команды должна вернуть json ответ

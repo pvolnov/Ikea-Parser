@@ -88,10 +88,10 @@ class SimpleInfiniteRunner:
 if __name__ == '__main__':
     limit = 3
     runner = SimpleInfiniteRunner()
-    runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
+    # runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
     runner.add(run_spider(ProductPageSpider), sleep=30)
-    runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=10)
-    runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
+    runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=20)
+    # runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
     runner.start()
     start_pooling()
 
