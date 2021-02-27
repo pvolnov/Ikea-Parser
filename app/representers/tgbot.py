@@ -44,10 +44,14 @@ def new_doc(message):
     bot.reply_to(message, f"Загружен файл ({len(doc)} строк)")
 
     if user.mst == MessageStatus.FILL_DOC_FIELDS:
-        bot.send_message(message.chat.id, 'Подождите, обработка файла...')
-        update_document(filename)
-        with open(filename, "rb") as f:
-            bot.send_document(message.chat.id, f, caption="Обновленный файл с ikea.ua")
+        try:
+            bot.send_message(message.chat.id, 'Подождите, обработка файла...')
+            update_document(filename)
+            with open(filename, "rb") as f:
+                bot.send_document(message.chat.id, f, caption="Обновленный файл с ikea.ua")
+        except:
+            logger.exception('Fail to send file')
+            bot.send_message(message.chat.id, 'Загружен файл не по формату')
 
     if user.mst == MessageStatus.LOAD_FROM_IKEA_1:
         avilable_code = IkeaItems.select(IkeaItems.code).execute()
