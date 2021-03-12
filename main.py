@@ -18,7 +18,9 @@ from app.logging_config import logger
 import func_timeout
 from multiprocessing import Process
 from scrapy import Spider
+from threading import Thread
 
+from app.modules.selenium import Driver
 from app.representers.tgbot import start_pooling
 from app.updaters.base_updater import RowsUpdater
 from app.updaters.translate_updater import TranslateUpdater
@@ -72,10 +74,12 @@ class SimpleInfiniteRunner:
                 logger.exception('Task failed %s', func.__name__)
 
     def start(self):
+        threads = []
         with ThreadPoolExecutor() as executor:
             for (func, args, kwargs) in self.tasks:
-                thread = executor.submit(self.__infinite_wrapper, func, *args, **kwargs)
-                self.threads.append(thread)
+                threads.append(
+                    Thread(target=self.__infinite_wrapper, args=(func, *args), kwargs=kwargs)
+                )
 
     def stop(self):
         for thread in self.threads:
@@ -89,9 +93,8 @@ if __name__ == '__main__':
     limit = 3
     runner = SimpleInfiniteRunner()
     # runner.add(run_spider(LinksSpider), limit=limit, sleep=3600)
-    runner.add(run_spider(ProductPageSpider), sleep=30)
-    runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=20)
+    # runner.add(run_spider(ProductPageSpider), sleep=30)
+    # runner.add(run_updater(TranslateUpdater(limit=limit)), sleep=20)
     # runner.add(run_updater(CheckAvailableRowsUpdater(limit=limit)), sleep=30)
-    runner.start()
+    # runner.start()
     start_pooling()
-

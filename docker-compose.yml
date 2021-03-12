@@ -1,6 +1,14 @@
 version: "3.4"
 
 services:
+  selenoid:
+    image: selenium/standalone-chrome
+    restart: always
+    ports:
+      - 4444:4444
+
   parser:
     build: .
     restart: always
+    depends_on:
+      - selenoid
